@@ -33,11 +33,13 @@ import {
   Search as SearchIcon,
   TrendingUp as IncomeIcon,
   TrendingDown as ExpenseIcon,
+  Add as AddIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { transactionService } from '../services/transactionService';
 import { authService } from '../services/authService';
-import type { Transaction, TransactionFilter } from '../types/transaction';
+import type { Transaction, TransactionFilter, TransactionCreate } from '../types/transaction';
+import { CreateTransactionDialog } from '../components/CreateTransactionDialog';
 
 export const TransactionsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -46,6 +48,7 @@ export const TransactionsPage: React.FC = () => {
   const [error, setError] = useState('');
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   // Navigation handlers
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -92,6 +95,16 @@ export const TransactionsPage: React.FC = () => {
         loadTransactions();
       }
     }, 500);
+  };
+
+  const handleCreateTransaction = async (transactionData: TransactionCreate) => {
+    try {
+      const newTransaction = await transactionService.createTransaction(transactionData);
+      setTransactions(prev => [newTransaction, ...prev]);
+      setCreateDialogOpen(false);
+    } catch (err) {
+      throw err; // Let the dialog handle the error display
+    }
   };
 
   // Format currency
@@ -197,6 +210,13 @@ export const TransactionsPage: React.FC = () => {
           <Typography variant="h4" component="h1">
             Transactions
           </Typography>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setCreateDialogOpen(true)}
+          >
+            Add Transaction
+          </Button>
         </Box>
 
         {/* Search Bar */}
@@ -235,9 +255,18 @@ export const TransactionsPage: React.FC = () => {
                   <Typography variant="h6" gutterBottom>
                     No transactions found
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" color="text.secondary" paragraph>
                     {searchTerm ? 'Try adjusting your search terms.' : 'Start by creating some accounts and adding transactions.'}
                   </Typography>
+                  {!searchTerm && (
+                    <Button
+                      variant="contained"
+                      startIcon={<AddIcon />}
+                      onClick={() => setCreateDialogOpen(true)}
+                    >
+                      Add Your First Transaction
+                    </Button>
+                  )}
                 </Box>
               ) : (
                 <TableContainer component={Paper}>
@@ -311,6 +340,13 @@ export const TransactionsPage: React.FC = () => {
             </CardContent>
           </Card>
         )}
+
+        {/* Create Transaction Dialog */}
+        <CreateTransactionDialog
+          open={createDialogOpen}
+          onClose={() => setCreateDialogOpen(false)}
+          onSubmit={handleCreateTransaction}
+        />
       </Container>
     </>
   );

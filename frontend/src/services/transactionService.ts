@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Transaction, TransactionFilter, TransactionSummary, CategorySummary } from '../types/transaction';
+import type { Transaction, TransactionCreate, TransactionFilter, TransactionSummary, CategorySummary } from '../types/transaction';
 import { authService } from './authService';
 
 const API_BASE_URL = 'http://localhost:8000';
@@ -62,6 +62,19 @@ export const transactionService = {
     } catch (error) {
       if (axios.isAxiosError(error)) {
         throw new Error(error.response?.data?.detail || 'Failed to fetch transaction');
+      }
+      throw new Error('Network error');
+    }
+  },
+
+  // Create new transaction
+  createTransaction: async (transactionData: TransactionCreate): Promise<Transaction> => {
+    try {
+      const response = await api.post('/api/transactions', transactionData);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.detail || 'Failed to create transaction');
       }
       throw new Error('Network error');
     }
