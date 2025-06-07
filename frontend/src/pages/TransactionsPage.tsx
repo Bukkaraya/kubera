@@ -23,6 +23,9 @@ import {
   Chip,
   TextField,
   InputAdornment,
+  FormControl,
+  InputLabel,
+  Select,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -34,11 +37,16 @@ import {
   TrendingUp as IncomeIcon,
   TrendingDown as ExpenseIcon,
   Add as AddIcon,
+  FilterList as FilterIcon,
+  Clear as ClearIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { transactionService } from '../services/transactionService';
 import { authService } from '../services/authService';
-import type { Transaction, TransactionFilter, TransactionCreate } from '../types/transaction';
+import { accountService } from '../services/accountService';
+import { categoryService } from '../services/categoryService';
+import type { Transaction, TransactionFilter, TransactionCreate, Category } from '../types/transaction';
+import type { Account } from '../types/account';
 import { CreateTransactionDialog } from '../components/CreateTransactionDialog';
 
 export const TransactionsPage: React.FC = () => {
@@ -49,6 +57,15 @@ export const TransactionsPage: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [filters, setFilters] = useState<TransactionFilter>({
+    account_id: '',
+    category_id: '',
+    start_date: '',
+    end_date: '',
+    search: '',
+  });
 
   // Navigation handlers
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -64,10 +81,24 @@ export const TransactionsPage: React.FC = () => {
     navigate('/login');
   };
 
-  // Load transactions on component mount
+  // Load transactions and filter data on component mount
   useEffect(() => {
+    loadFilterData();
     loadTransactions();
   }, []);
+
+  const loadFilterData = async () => {
+    try {
+      const [accountsData, categoriesData] = await Promise.all([
+        accountService.getAccounts(),
+        categoryService.getCategories(),
+      ]);
+      setAccounts(accountsData);
+      setCategories(categoriesData);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load filter data');
+    }
+  };
 
   const loadTransactions = async (filters?: TransactionFilter) => {
     try {
@@ -87,14 +118,45 @@ export const TransactionsPage: React.FC = () => {
     const value = event.target.value;
     setSearchTerm(value);
     
+    const newFilters = { ...filters, search: value.trim() };
+    setFilters(newFilters);
+    
     // Debounce search
     setTimeout(() => {
-      if (value.trim()) {
-        loadTransactions({ search: value.trim() });
-      } else {
-        loadTransactions();
-      }
+      loadTransactions(newFilters);
     }, 500);
+  };
+
+  // Handle filter changes
+  const handleFilterChange = (filterType: keyof TransactionFilter, value: string) => {
+    const newFilters = { ...filters, [filterType]: value || undefined };
+    setFilters(newFilters);
+    loadTransactions(newFilters);
+  };
+
+  // Clear all filters
+  const clearFilters = () => {
+    const clearedFilters = {
+      account_id: '',
+      category_id: '',
+      start_date: '',
+      end_date: '',
+      search: '',
+    };
+    setFilters(clearedFilters);
+    setSearchTerm('');
+    loadTransactions();
+  };
+
+  // Check if any filters are active
+  const hasActiveFilters = () => {
+    return !!(
+      filters.account_id ||
+      filters.category_id ||
+      filters.start_date ||
+      filters.end_date ||
+      searchTerm.trim()
+    );
   };
 
   const handleCreateTransaction = async (transactionData: TransactionCreate) => {
@@ -219,21 +281,91 @@ export const TransactionsPage: React.FC = () => {
           </Button>
         </Box>
 
-        {/* Search Bar */}
+        {/* Search and Filters */}
         <Box sx={{ mb: 3 }}>
-          <TextField
-            fullWidth
-            placeholder="Search transactions..."
-            value={searchTerm}
-            onChange={handleSearch}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
+          <Box sx={{ 
+            display: 'grid', 
+            gridTemplateColumns: { 
+              xs: '1fr', 
+              md: 'repeat(2, 1fr)', 
+              lg: hasActiveFilters() ? '2fr 1fr 1fr 1fr 1fr auto' : '2fr 1fr 1fr 1fr 1fr'
+            },
+            gap: 2,
+            mb: 2
+          }}>
+            <TextField
+              label="Search transactions"
+              placeholder="Search by description..."
+              value={searchTerm}
+              onChange={handleSearch}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
+            
+            <FormControl>
+              <InputLabel>Account</InputLabel>
+              <Select
+                value={filters.account_id || ''}
+                label="Account"
+                onChange={(e) => handleFilterChange('account_id', e.target.value)}
+              >
+                <MenuItem value="">All Accounts</MenuItem>
+                {accounts.map((account) => (
+                  <MenuItem key={account.id} value={account.id.toString()}>
+                    {account.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <FormControl>
+              <InputLabel>Category</InputLabel>
+              <Select
+                value={filters.category_id || ''}
+                label="Category"
+                onChange={(e) => handleFilterChange('category_id', e.target.value)}
+              >
+                <MenuItem value="">All Categories</MenuItem>
+                {categories.map((category) => (
+                  <MenuItem key={category.id} value={category.id.toString()}>
+                    {category.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <TextField
+              type="date"
+              label="Start Date"
+              value={filters.start_date || ''}
+              onChange={(e) => handleFilterChange('start_date', e.target.value)}
+              InputLabelProps={{ shrink: true }}
+            />
+
+            <TextField
+              type="date"
+              label="End Date"
+              value={filters.end_date || ''}
+              onChange={(e) => handleFilterChange('end_date', e.target.value)}
+              InputLabelProps={{ shrink: true }}
+            />
+
+            {hasActiveFilters() && (
+              <Button
+                variant="outlined"
+                onClick={clearFilters}
+                startIcon={<ClearIcon />}
+                sx={{ height: '56px', whiteSpace: 'nowrap' }}
+              >
+                Clear Filters
+              </Button>
+            )}
+          </Box>
         </Box>
 
         {error && (
@@ -287,9 +419,6 @@ export const TransactionsPage: React.FC = () => {
                           <TableCell>
                             <Typography variant="body2">
                               {formatDate(transaction.transaction_date)}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {formatDateTime(transaction.transaction_date)}
                             </Typography>
                           </TableCell>
                           <TableCell>
