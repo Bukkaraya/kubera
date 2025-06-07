@@ -60,9 +60,10 @@ import { categoryService } from '../services/categoryService';
 import { recurringTransactionService } from '../services/recurringTransactionService';
 import type { Transaction, TransactionFilter, TransactionCreate, Category } from '../types/transaction';
 import type { Account } from '../types/account';
-import type { RecurringTransaction } from '../types/recurringTransaction';
+import type { RecurringTransaction, RecurringTransactionUpdate } from '../types/recurringTransaction';
 import { FREQUENCY_LABELS } from '../types/recurringTransaction';
 import { CreateTransactionDialog } from '../components/CreateTransactionDialog';
+import { EditRecurringTransactionDialog } from '../components/EditRecurringTransactionDialog';
 
 export const TransactionsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -78,6 +79,8 @@ export const TransactionsPage: React.FC = () => {
   const [currentTab, setCurrentTab] = useState(0);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [recurringToDelete, setRecurringToDelete] = useState<RecurringTransaction | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [recurringToEdit, setRecurringToEdit] = useState<RecurringTransaction | null>(null);
   const [filters, setFilters] = useState<TransactionFilter>({
     account_id: '',
     category_id: '',
@@ -235,6 +238,24 @@ export const TransactionsPage: React.FC = () => {
       setRecurringToDelete(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete recurring transaction');
+    }
+  };
+
+  const handleEditRecurring = (recurring: RecurringTransaction) => {
+    setRecurringToEdit(recurring);
+    setEditDialogOpen(true);
+  };
+
+  const handleUpdateRecurring = async (recurringTransactionData: RecurringTransactionUpdate) => {
+    if (!recurringToEdit) return;
+    
+    try {
+      await recurringTransactionService.updateRecurringTransaction(recurringToEdit.id, recurringTransactionData);
+      await loadRecurringTransactions();
+      setEditDialogOpen(false);
+      setRecurringToEdit(null);
+    } catch (err) {
+      throw err; // Let the dialog handle the error display
     }
   };
 
@@ -617,7 +638,11 @@ export const TransactionsPage: React.FC = () => {
                               {getRecurringStatusChip(recurring)}
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <IconButton size="small" color="primary">
+                              <IconButton 
+                                size="small" 
+                                color="primary"
+                                onClick={() => handleEditRecurring(recurring)}
+                              >
                                 <EditIcon />
                               </IconButton>
                               <IconButton
@@ -672,6 +697,14 @@ export const TransactionsPage: React.FC = () => {
           open={createDialogOpen}
           onClose={() => setCreateDialogOpen(false)}
           onSubmit={handleCreateTransaction}
+        />
+
+        {/* Edit Recurring Transaction Dialog */}
+        <EditRecurringTransactionDialog
+          open={editDialogOpen}
+          onClose={() => setEditDialogOpen(false)}
+          onSubmit={handleUpdateRecurring}
+          recurringTransaction={recurringToEdit}
         />
 
         {/* Delete Recurring Transaction Confirmation Dialog */}
