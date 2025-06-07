@@ -42,7 +42,7 @@ import { accountService } from '../services/accountService';
 import { transactionService } from '../services/transactionService';
 import type { Account } from '../types/account';
 import type { Transaction } from '../types/transaction';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, LineChart, Line, XAxis, YAxis, CartesianGrid, BarChart, Bar, ReferenceLine, ComposedChart } from 'recharts';
 
 export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
@@ -67,6 +67,12 @@ export const DashboardPage: React.FC = () => {
     day: number;
     currentMonth: number | null;
     previousMonth: number | null;
+  }>>([]);
+  const [monthlyComparison, setMonthlyComparison] = useState<Array<{
+    month: string;
+    netCashFlow: number;
+    income: number;
+    expenses: number;
   }>>([]);
   
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -201,6 +207,42 @@ export const DashboardPage: React.FC = () => {
       }
 
       setSpendingTrend(trendData);
+
+      // Calculate monthly comparison data for last 6 months
+      const monthlyData = [];
+      const comparisonDate = new Date();
+      
+      for (let i = 5; i >= 0; i--) {
+        const monthDate = new Date(comparisonDate.getFullYear(), comparisonDate.getMonth() - i, 1);
+        const year = monthDate.getFullYear();
+        const month = monthDate.getMonth();
+        
+        const monthStart = new Date(year, month, 1).toISOString().split('T')[0];
+        const monthEnd = new Date(year, month + 1, 0).toISOString().split('T')[0];
+        
+        // Get transactions for this month
+        const monthTransactions = await transactionService.getTransactions(0, 1000, {
+          start_date: monthStart,
+          end_date: monthEnd,
+        });
+        
+        const monthIncome = monthTransactions
+          .filter(t => t.is_income)
+          .reduce((sum, t) => sum + t.amount, 0);
+          
+        const monthExpenses = monthTransactions
+          .filter(t => !t.is_income)
+          .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+        
+        monthlyData.push({
+          month: monthDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+          netCashFlow: monthIncome - monthExpenses, // Net cash flow (positive = surplus, negative = deficit)
+          income: monthIncome,
+          expenses: -monthExpenses, // Negative for below-axis display
+        });
+      }
+      
+      setMonthlyComparison(monthlyData);
       
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load dashboard data');
@@ -575,6 +617,79 @@ export const DashboardPage: React.FC = () => {
                             }}
                           />
                         </LineChart>
+                      </ResponsiveContainer>
+                    </Box>
+                  )}
+                </CardContent>
+              </Card>
+            </Box>
+
+            {/* Monthly Income vs Expenses */}
+            <Box sx={{ mb: 3 }}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Cash Flow - Last 6 Months
+                  </Typography>
+                  {monthlyComparison.length === 0 ? (
+                    <Box sx={{ textAlign: 'center', py: 4 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        No monthly data available
+                      </Typography>
+                    </Box>
+                  ) : (
+                    <Box sx={{ height: 350 }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <ComposedChart
+                          data={monthlyComparison}
+                          margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                          <XAxis 
+                            dataKey="month" 
+                            stroke="#64748b"
+                            fontSize={12}
+                            tick={{ fontSize: 12 }}
+                            angle={-45}
+                            textAnchor="end"
+                            height={60}
+                          />
+                          <YAxis 
+                            stroke="#64748b"
+                            fontSize={12}
+                            tick={{ fontSize: 12 }}
+                            tickFormatter={(value) => {
+                              if (Math.abs(value) >= 1000) {
+                                return `$${(Math.abs(value) / 1000).toFixed(1)}k`;
+                              }
+                              return `$${Math.abs(value).toFixed(0)}`;
+                            }}
+                          />
+                          <Tooltip 
+                            formatter={(value, name) => [
+                              formatCurrency(Math.abs(value as number)), 
+                              name
+                            ]}
+                            labelFormatter={(month) => month}
+                            contentStyle={{
+                              backgroundColor: '#f8fafc',
+                              border: '1px solid #e2e8f0',
+                              borderRadius: '8px',
+                              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                            }}
+                          />
+                          <ReferenceLine y={0} stroke="#64748b" strokeDasharray="2 2" />
+                          <Bar 
+                            dataKey="income" 
+                            fill="#16a34a" 
+                            name="Income"
+                          />
+                          <Bar 
+                            dataKey="expenses" 
+                            fill="#dc2626" 
+                            name="Expenses"
+                          />
+                        </ComposedChart>
                       </ResponsiveContainer>
                     </Box>
                   )}
