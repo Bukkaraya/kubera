@@ -30,7 +30,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { accountService } from '../services/accountService';
 import { authService } from '../services/authService';
-import type { Account, AccountType } from '../types/account';
+import type { Account, AccountType, AccountCreate } from '../types/account';
+import { CreateAccountDialog } from '../components/CreateAccountDialog';
 
 export const AccountsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -38,6 +39,7 @@ export const AccountsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   // Navigation handlers
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -68,6 +70,16 @@ export const AccountsPage: React.FC = () => {
       setError(err instanceof Error ? err.message : 'Failed to load accounts');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCreateAccount = async (accountData: AccountCreate) => {
+    try {
+      const newAccount = await accountService.createAccount(accountData);
+      setAccounts(prev => [...prev, newAccount]);
+      setCreateDialogOpen(false);
+    } catch (err) {
+      throw err; // Let the dialog handle the error display
     }
   };
 
@@ -203,7 +215,7 @@ export const AccountsPage: React.FC = () => {
           <Button
             variant="contained"
             startIcon={<AddIcon />}
-            onClick={() => {/* TODO: Open create account dialog */}}
+            onClick={() => setCreateDialogOpen(true)}
           >
             Add Account
           </Button>
@@ -231,13 +243,13 @@ export const AccountsPage: React.FC = () => {
                   <Typography variant="body2" color="text.secondary" paragraph>
                     Create your first account to start tracking your finances.
                   </Typography>
-                  <Button
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={() => {/* TODO: Open create account dialog */}}
-                  >
-                    Add Your First Account
-                  </Button>
+                                      <Button
+                      variant="contained"
+                      startIcon={<AddIcon />}
+                      onClick={() => setCreateDialogOpen(true)}
+                    >
+                      Add Your First Account
+                    </Button>
                 </CardContent>
               </Card>
             ) : (
@@ -287,6 +299,13 @@ export const AccountsPage: React.FC = () => {
             )}
           </Box>
         )}
+
+        {/* Create Account Dialog */}
+        <CreateAccountDialog
+          open={createDialogOpen}
+          onClose={() => setCreateDialogOpen(false)}
+          onSubmit={handleCreateAccount}
+        />
       </Container>
     </>
   );
