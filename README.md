@@ -35,7 +35,9 @@ kubera/
 ├── backend/           # FastAPI backend
 │   ├── app/
 │   ├── alembic/
-│   ├── requirements.txt
+│   ├── pyproject.toml
+│   ├── setup-dev.sh
+│   ├── setup-dev.bat
 │   └── ...
 ├── frontend/          # React frontend
 │   ├── src/
@@ -45,14 +47,55 @@ kubera/
 └── README.md
 ```
 
+## Getting Started
+
+### Prerequisites
+
+- Python 3.9+
+- [uv](https://docs.astral.sh/uv/) (recommended) or pip
+- Node.js 16+
+- PostgreSQL (optional, SQLite used by default)
+
 ## Development Setup
 
 ### Backend Setup
+
+#### Using uv (Recommended)
+
+1. Install uv if you haven't already:
+   ```bash
+   # On macOS and Linux
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   
+   # On Windows
+   powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+   
+   # Or with pip
+   pip install uv
+   ```
+
+2. Navigate to the backend directory and run setup:
+   ```bash
+   cd backend
+   
+   # On Unix/macOS
+   chmod +x setup-dev.sh && ./setup-dev.sh
+   
+   # On Windows
+   setup-dev.bat
+   ```
+
+3. Start the development server:
+   ```bash
+   uv run uvicorn app.main:app --reload
+   ```
+
+#### Using pip (Alternative)
 ```bash
 cd backend
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
+pip install -e .
 uvicorn app.main:app --reload
 ```
 
