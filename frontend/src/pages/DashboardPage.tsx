@@ -320,6 +320,14 @@ export const DashboardPage: React.FC = () => {
             </Button>
             <Button 
               color="inherit" 
+              startIcon={<IncomeIcon />} 
+              sx={{ fontSize: '1rem' }}
+              onClick={() => navigate('/budgets')}
+            >
+              Budgets
+            </Button>
+            <Button 
+              color="inherit" 
               startIcon={<LogoutIcon />} 
               sx={{ fontSize: '1rem', ml: 2 }}
               onClick={handleLogout}
@@ -353,6 +361,10 @@ export const DashboardPage: React.FC = () => {
               <MenuItem onClick={() => { handleMenuClose(); navigate('/transactions'); }}>
                 <TransactionIcon sx={{ mr: 1 }} />
                 Transactions
+              </MenuItem>
+              <MenuItem onClick={() => { handleMenuClose(); navigate('/budgets'); }}>
+                <IncomeIcon sx={{ mr: 1 }} />
+                Budgets
               </MenuItem>
               <MenuItem onClick={() => { handleMenuClose(); handleLogout(); }}>
                 <LogoutIcon sx={{ mr: 1 }} />

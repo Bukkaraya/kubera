@@ -1,17 +1,18 @@
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import {
+import axios from 'axios';
+import type { AxiosInstance, AxiosResponse } from 'axios';
+import type {
   LoginRequest,
   LoginResponse,
-  // Account,
+  Account,
   Category,
   Transaction,
   CreateTransactionRequest,
   RecurringTransaction,
-  Budget,
   TransactionFilters,
   ApiResponse,
   PaginatedResponse,
 } from '../types';
+import type { Budget } from '../types/budget';
 
 const API_BASE_URL = 'http://localhost:8000';
 
@@ -23,16 +24,7 @@ const api = axios.create({
   },
 });
 
-// Types for API requests/responses
-export interface LoginRequest {
-  username: string;
-  password: string;
-}
-
-export interface LoginResponse {
-  access_token: string;
-  token_type: string;
-}
+// Types are imported from ../types
 
 // Authentication API
 export const authAPI = {

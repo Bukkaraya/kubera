@@ -65,7 +65,7 @@ class TransactionService:
         # Create transaction
         transaction = Transaction(
             amount=transaction_data.amount,
-            description=transaction_data.description,
+            payee=transaction_data.payee,
             notes=transaction_data.notes,
             transaction_date=transaction_data.transaction_date,
             is_income=transaction_data.is_income,
@@ -269,7 +269,7 @@ class TransactionService:
             search_term = f"%{filters.search}%"
             query = query.filter(
                 or_(
-                    Transaction.description.ilike(search_term),
+                    Transaction.payee.ilike(search_term),
                     Transaction.notes.ilike(search_term)
                 )
             )

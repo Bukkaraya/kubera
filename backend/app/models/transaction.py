@@ -10,7 +10,7 @@ class Transaction(Base):
     
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
     amount = Column(Numeric(precision=10, scale=2), nullable=False)
-    description = Column(String(255), nullable=False)
+    payee = Column(String(255), nullable=False)
     notes = Column(Text, nullable=True)
     transaction_date = Column(DateTime, nullable=False, index=True)
     is_income = Column(Boolean, default=False, index=True)
@@ -28,4 +28,4 @@ class Transaction(Base):
     recurring_transaction = relationship("RecurringTransaction", back_populates="generated_transactions")
     
     def __repr__(self):
-        return f"<Transaction(amount={self.amount}, description='{self.description}')>"
+        return f"<Transaction(amount={self.amount}, payee='{self.payee}')>"

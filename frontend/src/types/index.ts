@@ -92,15 +92,7 @@ export interface RecurringTransaction {
   created_at: string;
 }
 
-// Budget types
-export interface Budget {
-  id: string;
-  user_id?: string;
-  category_id?: string;
-  month: string;
-  amount: number;
-  created_at: string;
-}
+// Budget types (now imported from ./budget.ts)
 
 // API Response types
 export interface ApiResponse<T> {
@@ -145,4 +137,7 @@ export interface DashboardData {
     income: number;
     expenses: number;
   }[];
-} 
+}
+
+// Export budget types
+export * from './budget'; 

@@ -9,7 +9,7 @@ from ..schemas.category import CategoryResponse
 
 class TransactionBase(BaseModel):
     amount: Decimal = Field(..., description="Transaction amount (positive for income, negative for expense)")
-    description: str = Field(..., min_length=1, max_length=255, description="Transaction description")
+    payee: str = Field(..., min_length=1, max_length=255, description="Who the transaction was paid to")
     notes: Optional[str] = Field(None, description="Additional notes")
     transaction_date: datetime = Field(..., description="When the transaction occurred")
     is_income: bool = Field(default=False, description="Whether this is an income transaction")
@@ -30,7 +30,7 @@ class TransactionCreate(TransactionBase):
 
 class TransactionUpdate(BaseModel):
     amount: Optional[Decimal] = Field(None, description="Transaction amount")
-    description: Optional[str] = Field(None, min_length=1, max_length=255, description="Transaction description")
+    payee: Optional[str] = Field(None, min_length=1, max_length=255, description="Who the transaction was paid to")
     notes: Optional[str] = Field(None, description="Additional notes")
     transaction_date: Optional[datetime] = Field(None, description="When the transaction occurred")
     is_income: Optional[bool] = Field(None, description="Whether this is an income transaction")

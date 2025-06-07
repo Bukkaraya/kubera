@@ -39,6 +39,7 @@ import {
   Add as AddIcon,
   FilterList as FilterIcon,
   Clear as ClearIcon,
+  TrendingUp as TrendingUpIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { transactionService } from '../services/transactionService';
@@ -223,6 +224,14 @@ export const TransactionsPage: React.FC = () => {
             </Button>
             <Button 
               color="inherit" 
+              startIcon={<TrendingUpIcon />} 
+              sx={{ fontSize: '1rem' }}
+              onClick={() => navigate('/budgets')}
+            >
+              Budgets
+            </Button>
+            <Button 
+              color="inherit" 
               startIcon={<LogoutIcon />} 
               sx={{ fontSize: '1rem', ml: 2 }}
               onClick={handleLogout}
@@ -256,6 +265,10 @@ export const TransactionsPage: React.FC = () => {
               <MenuItem onClick={handleMenuClose}>
                 <TransactionIcon sx={{ mr: 1 }} />
                 Transactions
+              </MenuItem>
+              <MenuItem onClick={() => { handleMenuClose(); navigate('/budgets'); }}>
+                <TrendingUpIcon sx={{ mr: 1 }} />
+                Budgets
               </MenuItem>
               <MenuItem onClick={() => { handleMenuClose(); handleLogout(); }}>
                 <LogoutIcon sx={{ mr: 1 }} />
@@ -295,7 +308,7 @@ export const TransactionsPage: React.FC = () => {
           }}>
             <TextField
               label="Search transactions"
-              placeholder="Search by description..."
+              placeholder="Search by payee or notes..."
               value={searchTerm}
               onChange={handleSearch}
               InputProps={{
@@ -406,7 +419,7 @@ export const TransactionsPage: React.FC = () => {
                     <TableHead>
                       <TableRow>
                         <TableCell>Date</TableCell>
-                        <TableCell>Description</TableCell>
+                        <TableCell>Payee</TableCell>
                         <TableCell>Account</TableCell>
                         <TableCell>Category</TableCell>
                         <TableCell>Type</TableCell>
@@ -423,7 +436,7 @@ export const TransactionsPage: React.FC = () => {
                           </TableCell>
                           <TableCell>
                             <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                              {transaction.description}
+                              {transaction.payee}
                             </Typography>
                             {transaction.notes && (
                               <Typography variant="caption" color="text.secondary">

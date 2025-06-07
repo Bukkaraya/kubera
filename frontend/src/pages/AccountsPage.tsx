@@ -26,6 +26,7 @@ import {
   Dashboard as DashboardIcon,
   Receipt as TransactionIcon,
   Logout as LogoutIcon,
+  TrendingUp as TrendingUpIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { accountService } from '../services/accountService';
@@ -168,6 +169,14 @@ export const AccountsPage: React.FC = () => {
             </Button>
             <Button 
               color="inherit" 
+              startIcon={<TrendingUpIcon />} 
+              sx={{ fontSize: '1rem' }}
+              onClick={() => navigate('/budgets')}
+            >
+              Budgets
+            </Button>
+            <Button 
+              color="inherit" 
               startIcon={<LogoutIcon />} 
               sx={{ fontSize: '1rem', ml: 2 }}
               onClick={handleLogout}
@@ -201,6 +210,10 @@ export const AccountsPage: React.FC = () => {
               <MenuItem onClick={() => { handleMenuClose(); navigate('/transactions'); }}>
                 <TransactionIcon sx={{ mr: 1 }} />
                 Transactions
+              </MenuItem>
+              <MenuItem onClick={() => { handleMenuClose(); navigate('/budgets'); }}>
+                <TrendingUpIcon sx={{ mr: 1 }} />
+                Budgets
               </MenuItem>
               <MenuItem onClick={() => { handleMenuClose(); handleLogout(); }}>
                 <LogoutIcon sx={{ mr: 1 }} />

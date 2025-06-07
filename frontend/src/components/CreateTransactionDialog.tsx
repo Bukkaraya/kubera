@@ -35,7 +35,7 @@ export const CreateTransactionDialog: React.FC<CreateTransactionDialogProps> = (
   onSubmit,
 }) => {
   const [formData, setFormData] = useState<TransactionCreate>({
-    description: '',
+    payee: '',
     amount: 0,
     account_id: '',
     category_id: '',
@@ -137,7 +137,7 @@ export const CreateTransactionDialog: React.FC<CreateTransactionDialogProps> = (
   const handleClose = () => {
     if (!loading) {
       setFormData({
-        description: '',
+        payee: '',
         amount: 0,
         account_id: '',
         category_id: '',
@@ -237,14 +237,15 @@ export const CreateTransactionDialog: React.FC<CreateTransactionDialogProps> = (
                 </Typography>
               </Box>
 
-              {/* Description */}
+              {/* Payee */}
               <TextField
-                label="Description (Optional)"
-                value={formData.description}
-                onChange={handleInputChange('description')}
+                label="Payee"
+                value={formData.payee}
+                onChange={handleInputChange('payee')}
                 fullWidth
+                required
                 disabled={loading || loadingData}
-                placeholder="e.g., Grocery shopping, Salary payment"
+                placeholder="e.g., Starbucks, Amazon, John Doe"
                 inputProps={{ maxLength: 255 }}
               />
 

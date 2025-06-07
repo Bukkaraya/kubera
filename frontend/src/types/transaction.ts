@@ -11,7 +11,7 @@ export interface Category {
 
 export interface TransactionBase {
   amount: number;
-  description: string;
+  payee: string;
   notes?: string;
   transaction_date: string;
   is_income: boolean;
@@ -23,7 +23,7 @@ export interface TransactionCreate extends TransactionBase {}
 
 export interface TransactionUpdate {
   amount?: number;
-  description?: string;
+  payee?: string;
   notes?: string;
   transaction_date?: string;
   is_income?: boolean;
