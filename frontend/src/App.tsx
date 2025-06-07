@@ -5,6 +5,7 @@ import { CssBaseline } from '@mui/material';
 import { theme } from './theme';
 import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { AccountsPage } from './pages/AccountsPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
 function App() {
@@ -19,6 +20,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <DashboardPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/accounts" 
+            element={
+              <ProtectedRoute>
+                <AccountsPage />
               </ProtectedRoute>
             } 
           />

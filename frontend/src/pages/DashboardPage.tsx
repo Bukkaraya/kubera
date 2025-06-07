@@ -53,7 +53,12 @@ export const DashboardPage: React.FC = () => {
             <Button color="inherit" startIcon={<DashboardIcon />} sx={{ fontSize: '1rem' }}>
               Dashboard
             </Button>
-            <Button color="inherit" startIcon={<AccountIcon />} sx={{ fontSize: '1rem' }}>
+            <Button 
+              color="inherit" 
+              startIcon={<AccountIcon />} 
+              sx={{ fontSize: '1rem' }}
+              onClick={() => navigate('/accounts')}
+            >
               Accounts
             </Button>
             <Button color="inherit" startIcon={<TransactionIcon />} sx={{ fontSize: '1rem' }}>
@@ -87,7 +92,7 @@ export const DashboardPage: React.FC = () => {
                 <DashboardIcon sx={{ mr: 1 }} />
                 Dashboard
               </MenuItem>
-              <MenuItem onClick={handleMenuClose}>
+              <MenuItem onClick={() => { handleMenuClose(); navigate('/accounts'); }}>
                 <AccountIcon sx={{ mr: 1 }} />
                 Accounts
               </MenuItem>
