@@ -140,4 +140,7 @@ export interface DashboardData {
 }
 
 // Export budget types
-export * from './budget'; 
+export * from './budget';
+
+// Export recurring transaction types
+export * from './recurringTransaction'; 

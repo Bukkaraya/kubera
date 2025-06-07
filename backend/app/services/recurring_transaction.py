@@ -83,7 +83,7 @@ class RecurringTransactionService:
         # Create recurring transaction
         recurring_transaction = RecurringTransaction(
             amount=recurring_transaction_data.amount,
-            description=recurring_transaction_data.description,
+            payee=recurring_transaction_data.payee,
             notes=recurring_transaction_data.notes,
             frequency=recurring_transaction_data.frequency,
             start_date=recurring_transaction_data.start_date,
@@ -180,7 +180,7 @@ class RecurringTransactionService:
         # Create transaction
         transaction = Transaction(
             amount=recurring_transaction.amount,
-            description=recurring_transaction.description,
+            payee=recurring_transaction.payee,
             notes=recurring_transaction.notes,
             transaction_date=recurring_transaction.next_execution_date,
             is_income=recurring_transaction.is_income,

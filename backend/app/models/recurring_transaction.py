@@ -20,7 +20,7 @@ class RecurringTransaction(Base):
     
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
     amount = Column(Numeric(precision=10, scale=2), nullable=False)
-    description = Column(String(255), nullable=False)
+    payee = Column(String(255), nullable=False)
     notes = Column(Text, nullable=True)
     frequency = Column(Enum(FrequencyType), nullable=False)
     start_date = Column(DateTime, nullable=False, index=True)

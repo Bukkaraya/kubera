@@ -10,7 +10,7 @@ from ..schemas.category import CategoryResponse
 
 class RecurringTransactionBase(BaseModel):
     amount: Decimal = Field(..., description="Transaction amount")
-    description: str = Field(..., min_length=1, max_length=255, description="Transaction description")
+    payee: str = Field(..., min_length=1, max_length=255, description="Who the transaction is paid to")
     notes: Optional[str] = Field(None, description="Additional notes")
     frequency: FrequencyType = Field(..., description="How often this transaction repeats")
     start_date: datetime = Field(..., description="When recurring transactions should start")
@@ -39,7 +39,7 @@ class RecurringTransactionCreate(RecurringTransactionBase):
 
 class RecurringTransactionUpdate(BaseModel):
     amount: Optional[Decimal] = Field(None, description="Transaction amount")
-    description: Optional[str] = Field(None, min_length=1, max_length=255, description="Transaction description")
+    payee: Optional[str] = Field(None, min_length=1, max_length=255, description="Who the transaction is paid to")
     notes: Optional[str] = Field(None, description="Additional notes")
     frequency: Optional[FrequencyType] = Field(None, description="How often this transaction repeats")
     start_date: Optional[datetime] = Field(None, description="When recurring transactions should start")
@@ -69,7 +69,7 @@ class RecurringTransactionResponse(RecurringTransactionBase):
 
 class RecurringTransactionSummary(BaseModel):
     id: str
-    description: str
+    payee: str
     amount: Decimal
     frequency: FrequencyType
     next_execution_date: datetime
