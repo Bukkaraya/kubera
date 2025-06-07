@@ -3,57 +3,46 @@ import { useNavigate } from 'react-router-dom';
 import {
   Container,
   Paper,
+  Box,
+  Typography,
   TextField,
   Button,
-  Typography,
-  Box,
   Alert,
-  CircularProgress,
 } from '@mui/material';
-import { useAuth } from '../contexts/AuthContext';
-import { LoginRequest } from '../types';
+import { authService } from '../services/authService';
 
 export const LoginPage: React.FC = () => {
-  const [credentials, setCredentials] = useState<LoginRequest>({
-    username: '',
-    password: '',
-  });
-  const [error, setError] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(false);
-  
-  const { login } = useAuth();
   const navigate = useNavigate();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleInputChange = (field: keyof LoginRequest) => (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setCredentials(prev => ({
-      ...prev,
-      [field]: event.target.value,
-    }));
-    // Clear error when user starts typing
-    if (error) {
-      setError('');
-    }
-  };
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    
-    if (!credentials.username || !credentials.password) {
-      setError('Please enter both username and password');
+    // Simple validation
+    if (!username || !password) {
+      setError('Please fill in all fields');
+      setIsLoading(false);
       return;
     }
 
     try {
-      setLoading(true);
-      setError('');
-      await login(credentials);
+      // Call the real backend API
+      const response = await authService.login({ username, password });
+      
+      // Save the token
+      authService.saveToken(response.access_token);
+      
+      // Navigate to dashboard on successful login
       navigate('/dashboard');
-    } catch (error: any) {
-      setError(error.response?.data?.detail || 'Login failed. Please check your credentials.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login failed. Please try again.');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -76,23 +65,22 @@ export const LoginPage: React.FC = () => {
             flexDirection: 'column',
             alignItems: 'center',
             width: '100%',
-            maxWidth: 400,
           }}
         >
-          <Typography component="h1" variant="h4" gutterBottom>
-            Budget Tracker
+          <Typography component="h1" variant="h3" gutterBottom color="primary" sx={{ fontWeight: 600 }}>
+            Kubera
           </Typography>
-          <Typography variant="h6" color="text.secondary" gutterBottom>
+          <Typography variant="h5" gutterBottom color="text.secondary">
             Sign in to your account
           </Typography>
-          
+
           {error && (
             <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
               {error}
             </Alert>
           )}
 
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
+          <Box component="form" onSubmit={handleLogin} sx={{ mt: 1, width: '100%' }}>
             <TextField
               margin="normal"
               required
@@ -102,9 +90,10 @@ export const LoginPage: React.FC = () => {
               name="username"
               autoComplete="username"
               autoFocus
-              value={credentials.username}
-              onChange={handleInputChange('username')}
-              disabled={loading}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              disabled={isLoading}
+              helperText="Use 'admin' for demo"
             />
             <TextField
               margin="normal"
@@ -115,20 +104,26 @@ export const LoginPage: React.FC = () => {
               type="password"
               id="password"
               autoComplete="current-password"
-              value={credentials.password}
-              onChange={handleInputChange('password')}
-              disabled={loading}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={isLoading}
+              helperText="Use 'admin123' for demo"
             />
             <Button
               type="submit"
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
-              disabled={loading}
-              startIcon={loading ? <CircularProgress size={20} /> : null}
+              disabled={isLoading}
             >
-              {loading ? 'Signing In...' : 'Sign In'}
+              {isLoading ? 'Signing In...' : 'Sign In'}
             </Button>
+          </Box>
+
+          <Box sx={{ mt: 2, textAlign: 'center' }}>
+            <Typography variant="body2" color="text.secondary">
+              Demo credentials: admin / admin123
+            </Typography>
           </Box>
         </Paper>
       </Box>

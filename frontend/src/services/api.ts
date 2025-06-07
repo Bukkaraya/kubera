@@ -13,6 +13,46 @@ import {
   PaginatedResponse,
 } from '../types';
 
+const API_BASE_URL = 'http://localhost:8000';
+
+// Create axios instance
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Types for API requests/responses
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  access_token: string;
+  token_type: string;
+}
+
+// Authentication API
+export const authAPI = {
+  login: async (credentials: LoginRequest): Promise<LoginResponse> => {
+    const response = await api.post('/api/auth/login', credentials);
+    return response.data;
+  },
+};
+
+// Add token to requests if available
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('access_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+export default api;
+
 class ApiService {
   private api: AxiosInstance;
   private baseURL: string;
