@@ -10,10 +10,6 @@ import {
   IconButton,
   Alert,
   CircularProgress,
-  AppBar,
-  Toolbar,
-  Menu,
-  MenuItem,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -22,39 +18,20 @@ import {
   Savings as SavingsIcon,
   TrendingUp as InvestmentIcon,
   Money as CashIcon,
-  Menu as MenuIcon,
-  Dashboard as DashboardIcon,
-  Receipt as TransactionIcon,
-  Logout as LogoutIcon,
-  TrendingUp as TrendingUpIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { accountService } from '../services/accountService';
 import { authService } from '../services/authService';
 import type { Account, AccountType, AccountCreate } from '../types/account';
 import { CreateAccountDialog } from '../components/CreateAccountDialog';
+import { Layout } from '../components/Layout';
 
 export const AccountsPage: React.FC = () => {
   const navigate = useNavigate();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-
-  // Navigation handlers
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleLogout = () => {
-    authService.removeToken();
-    navigate('/login');
-  };
 
   // Load accounts on component mount
   useEffect(() => {
@@ -134,97 +111,7 @@ export const AccountsPage: React.FC = () => {
   };
 
   return (
-    <>
-      {/* Navigation Bar */}
-      <AppBar position="sticky">
-        <Toolbar>
-          <Typography variant="h5" component="div" sx={{ flexGrow: 1, fontWeight: 600 }}>
-            Kubera
-          </Typography>
-          
-          {/* Desktop Navigation */}
-          <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-            <Button 
-              color="inherit" 
-              startIcon={<DashboardIcon />} 
-              sx={{ fontSize: '1rem' }}
-              onClick={() => navigate('/dashboard')}
-            >
-              Dashboard
-            </Button>
-            <Button 
-              color="inherit" 
-              startIcon={<AccountIcon />} 
-              sx={{ fontSize: '1rem', bgcolor: 'rgba(255,255,255,0.1)' }}
-            >
-              Accounts
-            </Button>
-            <Button 
-              color="inherit" 
-              startIcon={<TransactionIcon />} 
-              sx={{ fontSize: '1rem' }}
-              onClick={() => navigate('/transactions')}
-            >
-              Transactions
-            </Button>
-            <Button 
-              color="inherit" 
-              startIcon={<TrendingUpIcon />} 
-              sx={{ fontSize: '1rem' }}
-              onClick={() => navigate('/budgets')}
-            >
-              Budgets
-            </Button>
-            <Button 
-              color="inherit" 
-              startIcon={<LogoutIcon />} 
-              sx={{ fontSize: '1rem', ml: 2 }}
-              onClick={handleLogout}
-            >
-              Logout
-            </Button>
-          </Box>
-          
-          {/* Mobile Navigation */}
-          <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
-            <IconButton
-              color="inherit"
-              aria-label="menu"
-              onClick={handleMenuOpen}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={handleMenuClose}
-            >
-              <MenuItem onClick={() => { handleMenuClose(); navigate('/dashboard'); }}>
-                <DashboardIcon sx={{ mr: 1 }} />
-                Dashboard
-              </MenuItem>
-              <MenuItem onClick={handleMenuClose}>
-                <AccountIcon sx={{ mr: 1 }} />
-                Accounts
-              </MenuItem>
-              <MenuItem onClick={() => { handleMenuClose(); navigate('/transactions'); }}>
-                <TransactionIcon sx={{ mr: 1 }} />
-                Transactions
-              </MenuItem>
-              <MenuItem onClick={() => { handleMenuClose(); navigate('/budgets'); }}>
-                <TrendingUpIcon sx={{ mr: 1 }} />
-                Budgets
-              </MenuItem>
-              <MenuItem onClick={() => { handleMenuClose(); handleLogout(); }}>
-                <LogoutIcon sx={{ mr: 1 }} />
-                Logout
-              </MenuItem>
-            </Menu>
-          </Box>
-        </Toolbar>
-      </AppBar>
-
-      {/* Main Content */}
+    <Layout>
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
           <Typography variant="h4" component="h1">
@@ -325,6 +212,6 @@ export const AccountsPage: React.FC = () => {
           onSubmit={handleCreateAccount}
         />
       </Container>
-    </>
+    </Layout>
   );
 }; 

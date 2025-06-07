@@ -7,11 +7,6 @@ import {
   CardContent, 
   Button,
   Box,
-  AppBar,
-  Toolbar,
-  IconButton,
-  Menu,
-  MenuItem,
   Chip,
   Alert,
   CircularProgress,
@@ -24,18 +19,14 @@ import {
   LinearProgress
 } from '@mui/material';
 import { 
-  Menu as MenuIcon,
-  Dashboard as DashboardIcon,
-  AccountBalance as AccountIcon,
-  Receipt as TransactionIcon,
-  Logout as LogoutIcon,
   Add as AddIcon,
   TrendingUp as IncomeIcon,
   TrendingDown as ExpenseIcon,
   Savings as SavingsIcon,
   CreditCard as CreditIcon,
   AccountBalanceWallet as WalletIcon,
-  BusinessCenter as InvestmentIcon
+  BusinessCenter as InvestmentIcon,
+  AccountBalance as AccountIcon
 } from '@mui/icons-material';
 import { authService } from '../services/authService';
 import { accountService } from '../services/accountService';
@@ -43,10 +34,10 @@ import { transactionService } from '../services/transactionService';
 import type { Account } from '../types/account';
 import type { Transaction } from '../types/transaction';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, LineChart, Line, XAxis, YAxis, CartesianGrid, BarChart, Bar, ReferenceLine, ComposedChart } from 'recharts';
+import { Layout } from '../components/Layout';
 
 export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   
   // Dashboard data state
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -74,19 +65,6 @@ export const DashboardPage: React.FC = () => {
     income: number;
     expenses: number;
   }>>([]);
-  
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-  
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleLogout = () => {
-    authService.removeToken();
-    navigate('/login');
-  };
 
   // Load dashboard data
   useEffect(() => {
@@ -286,96 +264,8 @@ export const DashboardPage: React.FC = () => {
     }, 0);
   };
 
-
-
   return (
-    <>
-      {/* Navigation Bar */}
-      <AppBar position="sticky">
-        <Toolbar>
-          <Typography variant="h5" component="div" sx={{ flexGrow: 1, fontWeight: 600 }}>
-            Kubera
-          </Typography>
-          
-          {/* Desktop Navigation */}
-          <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-            <Button color="inherit" startIcon={<DashboardIcon />} sx={{ fontSize: '1rem' }}>
-              Dashboard
-            </Button>
-            <Button 
-              color="inherit" 
-              startIcon={<AccountIcon />} 
-              sx={{ fontSize: '1rem' }}
-              onClick={() => navigate('/accounts')}
-            >
-              Accounts
-            </Button>
-            <Button 
-              color="inherit" 
-              startIcon={<TransactionIcon />} 
-              sx={{ fontSize: '1rem' }}
-              onClick={() => navigate('/transactions')}
-            >
-              Transactions
-            </Button>
-            <Button 
-              color="inherit" 
-              startIcon={<IncomeIcon />} 
-              sx={{ fontSize: '1rem' }}
-              onClick={() => navigate('/budgets')}
-            >
-              Budgets
-            </Button>
-            <Button 
-              color="inherit" 
-              startIcon={<LogoutIcon />} 
-              sx={{ fontSize: '1rem', ml: 2 }}
-              onClick={handleLogout}
-            >
-              Logout
-            </Button>
-          </Box>
-          
-          {/* Mobile Navigation */}
-          <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
-            <IconButton
-              color="inherit"
-              aria-label="menu"
-              onClick={handleMenuOpen}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={handleMenuClose}
-            >
-              <MenuItem onClick={handleMenuClose}>
-                <DashboardIcon sx={{ mr: 1 }} />
-                Dashboard
-              </MenuItem>
-              <MenuItem onClick={() => { handleMenuClose(); navigate('/accounts'); }}>
-                <AccountIcon sx={{ mr: 1 }} />
-                Accounts
-              </MenuItem>
-              <MenuItem onClick={() => { handleMenuClose(); navigate('/transactions'); }}>
-                <TransactionIcon sx={{ mr: 1 }} />
-                Transactions
-              </MenuItem>
-              <MenuItem onClick={() => { handleMenuClose(); navigate('/budgets'); }}>
-                <IncomeIcon sx={{ mr: 1 }} />
-                Budgets
-              </MenuItem>
-              <MenuItem onClick={() => { handleMenuClose(); handleLogout(); }}>
-                <LogoutIcon sx={{ mr: 1 }} />
-                Logout
-              </MenuItem>
-            </Menu>
-          </Box>
-        </Toolbar>
-      </AppBar>
-
-      {/* Main Content */}
+    <Layout>
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
           <Typography variant="h4" component="h1">
@@ -780,10 +670,17 @@ export const DashboardPage: React.FC = () => {
                             </Avatar>
                           </ListItemAvatar>
                           <ListItemText
-                            primary={transaction.description}
-                            secondary={`${transaction.account?.name || 'Unknown'} • ${new Date(transaction.transaction_date).toLocaleDateString()}`}
-                            primaryTypographyProps={{ fontSize: '0.9rem' }}
-                            secondaryTypographyProps={{ fontSize: '0.8rem' }}
+                            primary={transaction.payee}
+                            secondary={
+                              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                                <Typography variant="caption" color="text.secondary">
+                                  {transaction.account?.name} • {transaction.category?.name}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  {new Date(transaction.transaction_date).toLocaleDateString()}
+                                </Typography>
+                              </Box>
+                            }
                           />
                           <Typography 
                             variant="body2" 
@@ -804,6 +701,6 @@ export const DashboardPage: React.FC = () => {
           </Box>
         )}
       </Container>
-    </>
+    </Layout>
   );
 }; 

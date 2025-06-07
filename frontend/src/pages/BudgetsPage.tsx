@@ -20,10 +20,7 @@ import {
   FormControl,
   InputLabel,
   Select,
-  AppBar,
-  Toolbar,
   IconButton,
-  Menu,
   Fab,
   Paper,
   Divider,
@@ -32,11 +29,6 @@ import {
   Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  Menu as MenuIcon,
-  Dashboard as DashboardIcon,
-  AccountBalance as AccountIcon,
-  Receipt as TransactionIcon,
-  Logout as LogoutIcon,
   TrendingUp as BudgetIcon,
   Refresh as RefreshIcon,
   Analytics as AnalyticsIcon,
@@ -46,6 +38,7 @@ import { budgetService } from '../services/budgetService';
 import { categoryService } from '../services/categoryService';
 import type { Budget, BudgetCreate, BudgetUpdate, BudgetAnalysis } from '../types/budget';
 import type { Category } from '../types';
+import { Layout } from '../components/Layout';
 
 export const BudgetsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -54,7 +47,6 @@ export const BudgetsPage: React.FC = () => {
   const [budgetAnalysis, setBudgetAnalysis] = useState<BudgetAnalysis | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   
   // Dialog states
   const [openDialog, setOpenDialog] = useState(false);
@@ -78,19 +70,6 @@ export const BudgetsPage: React.FC = () => {
   useEffect(() => {
     loadData();
   }, [filterYear, filterMonth]);
-
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/auth');
-  };
 
   const loadData = async () => {
     try {
@@ -218,93 +197,7 @@ export const BudgetsPage: React.FC = () => {
   ];
 
   return (
-    <>
-      {/* Navigation Bar */}
-      <AppBar position="sticky">
-        <Toolbar>
-          <Typography variant="h5" component="div" sx={{ flexGrow: 1, fontWeight: 600 }}>
-            Kubera
-          </Typography>
-          
-          {/* Desktop Navigation */}
-          <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-            <Button 
-              color="inherit" 
-              startIcon={<DashboardIcon />} 
-              sx={{ fontSize: '1rem' }}
-              onClick={() => navigate('/dashboard')}
-            >
-              Dashboard
-            </Button>
-            <Button 
-              color="inherit" 
-              startIcon={<AccountIcon />} 
-              sx={{ fontSize: '1rem' }}
-              onClick={() => navigate('/accounts')}
-            >
-              Accounts
-            </Button>
-            <Button 
-              color="inherit" 
-              startIcon={<TransactionIcon />} 
-              sx={{ fontSize: '1rem' }}
-              onClick={() => navigate('/transactions')}
-            >
-              Transactions
-            </Button>
-            <Button color="inherit" startIcon={<BudgetIcon />} sx={{ fontSize: '1rem' }}>
-              Budgets
-            </Button>
-            <Button 
-              color="inherit" 
-              startIcon={<LogoutIcon />} 
-              sx={{ fontSize: '1rem', ml: 2 }}
-              onClick={handleLogout}
-            >
-              Logout
-            </Button>
-          </Box>
-          
-          {/* Mobile Navigation */}
-          <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
-            <IconButton
-              color="inherit"
-              aria-label="menu"
-              onClick={handleMenuOpen}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={handleMenuClose}
-            >
-              <MenuItem onClick={() => { handleMenuClose(); navigate('/dashboard'); }}>
-                <DashboardIcon sx={{ mr: 1 }} />
-                Dashboard
-              </MenuItem>
-              <MenuItem onClick={() => { handleMenuClose(); navigate('/accounts'); }}>
-                <AccountIcon sx={{ mr: 1 }} />
-                Accounts
-              </MenuItem>
-              <MenuItem onClick={() => { handleMenuClose(); navigate('/transactions'); }}>
-                <TransactionIcon sx={{ mr: 1 }} />
-                Transactions
-              </MenuItem>
-              <MenuItem onClick={handleMenuClose}>
-                <BudgetIcon sx={{ mr: 1 }} />
-                Budgets
-              </MenuItem>
-              <MenuItem onClick={() => { handleMenuClose(); handleLogout(); }}>
-                <LogoutIcon sx={{ mr: 1 }} />
-                Logout
-              </MenuItem>
-            </Menu>
-          </Box>
-        </Toolbar>
-      </AppBar>
-
-      {/* Main Content */}
+    <Layout>
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
           <Typography variant="h4" component="h1">
@@ -637,6 +530,6 @@ export const BudgetsPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </>
+    </Layout>
   );
 }; 

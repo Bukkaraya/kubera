@@ -6,11 +6,7 @@ import {
   Button,
   Card,
   CardContent,
-  AppBar,
-  Toolbar,
   IconButton,
-  Menu,
-  MenuItem,
   Alert,
   CircularProgress,
   Chip,
@@ -23,17 +19,12 @@ import {
   FormControl,
   InputLabel,
   Select,
+  MenuItem,
   Divider,
 } from '@mui/material';
 import {
   Add as AddIcon,
-  Menu as MenuIcon,
-  Dashboard as DashboardIcon,
-  AccountBalance as AccountIcon,
-  Receipt as TransactionIcon,
-  TrendingUp as BudgetIcon,
   Repeat as RecurringIcon,
-  Logout as LogoutIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
   PlayArrow as GenerateIcon,
@@ -50,11 +41,12 @@ import { categoryService } from '../services/categoryService';
 import type { 
   RecurringTransaction, 
   RecurringTransactionCreate, 
-  FrequencyType,
-  FREQUENCY_LABELS 
+  FrequencyType
 } from '../types/recurringTransaction';
+import { FREQUENCY_LABELS } from '../types/recurringTransaction';
 import type { Account } from '../types/account';
 import type { Category } from '../types/transaction';
+import { Layout } from '../components/Layout';
 
 export const RecurringTransactionsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -63,7 +55,6 @@ export const RecurringTransactionsPage: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   
   // Dialog states
   const [openDialog, setOpenDialog] = useState(false);
@@ -82,20 +73,6 @@ export const RecurringTransactionsPage: React.FC = () => {
   useEffect(() => {
     loadData();
   }, []);
-
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('auth_token');
-    navigate('/login');
-  };
 
   const loadData = async () => {
     try {
@@ -225,365 +202,269 @@ export const RecurringTransactionsPage: React.FC = () => {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      {/* Navigation Bar */}
-      <AppBar position="sticky">
-        <Toolbar>
-          <Typography variant="h5" component="div" sx={{ flexGrow: 1, fontWeight: 600 }}>
-            Kubera
-          </Typography>
-          
-          {/* Desktop Navigation */}
-          <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-            <Button 
-              color="inherit" 
-              startIcon={<DashboardIcon />} 
-              sx={{ fontSize: '1rem' }}
-              onClick={() => navigate('/dashboard')}
-            >
-              Dashboard
-            </Button>
-            <Button 
-              color="inherit" 
-              startIcon={<AccountIcon />} 
-              sx={{ fontSize: '1rem' }}
-              onClick={() => navigate('/accounts')}
-            >
-              Accounts
-            </Button>
-            <Button 
-              color="inherit" 
-              startIcon={<TransactionIcon />} 
-              sx={{ fontSize: '1rem' }}
-              onClick={() => navigate('/transactions')}
-            >
-              Transactions
-            </Button>
-            <Button 
-              color="inherit" 
-              startIcon={<BudgetIcon />} 
-              sx={{ fontSize: '1rem' }}
-              onClick={() => navigate('/budgets')}
-            >
-              Budgets
-            </Button>
-            <Button color="inherit" startIcon={<RecurringIcon />} sx={{ fontSize: '1rem' }}>
-              Recurring
-            </Button>
-            <Button 
-              color="inherit" 
-              startIcon={<LogoutIcon />} 
-              sx={{ fontSize: '1rem', ml: 2 }}
-              onClick={handleLogout}
-            >
-              Logout
-            </Button>
+      <Layout>
+        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+            <Typography variant="h4" component="h1">
+              Recurring Transactions
+            </Typography>
+            <Box>
+              <Button
+                variant="outlined"
+                startIcon={<RefreshIcon />}
+                onClick={handleProcessDue}
+                sx={{ mr: 1 }}
+              >
+                Process Due
+              </Button>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={handleCreateRecurring}
+              >
+                Add Recurring
+              </Button>
+            </Box>
           </Box>
-          
-          {/* Mobile Navigation */}
-          <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
-            <IconButton
-              color="inherit"
-              aria-label="menu"
-              onClick={handleMenuOpen}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={handleMenuClose}
-            >
-              <MenuItem onClick={() => { handleMenuClose(); navigate('/dashboard'); }}>
-                <DashboardIcon sx={{ mr: 1 }} />
-                Dashboard
-              </MenuItem>
-              <MenuItem onClick={() => { handleMenuClose(); navigate('/accounts'); }}>
-                <AccountIcon sx={{ mr: 1 }} />
-                Accounts
-              </MenuItem>
-              <MenuItem onClick={() => { handleMenuClose(); navigate('/transactions'); }}>
-                <TransactionIcon sx={{ mr: 1 }} />
-                Transactions
-              </MenuItem>
-              <MenuItem onClick={() => { handleMenuClose(); navigate('/budgets'); }}>
-                <BudgetIcon sx={{ mr: 1 }} />
-                Budgets
-              </MenuItem>
-              <MenuItem onClick={handleMenuClose}>
-                <RecurringIcon sx={{ mr: 1 }} />
-                Recurring
-              </MenuItem>
-              <MenuItem onClick={() => { handleMenuClose(); handleLogout(); }}>
-                <LogoutIcon sx={{ mr: 1 }} />
-                Logout
-              </MenuItem>
-            </Menu>
-          </Box>
-        </Toolbar>
-      </AppBar>
 
-      {/* Main Content */}
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-          <Typography variant="h4" component="h1">
-            Recurring Transactions
-          </Typography>
-          <Box>
-            <Button
-              variant="outlined"
-              startIcon={<RefreshIcon />}
-              onClick={handleProcessDue}
-              sx={{ mr: 1 }}
-            >
-              Process Due
-            </Button>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={handleCreateRecurring}
-            >
-              Add Recurring
-            </Button>
-          </Box>
-        </Box>
+          {error && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {error}
+            </Alert>
+          )}
 
-        {error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
-            {error}
-          </Alert>
-        )}
-
-        {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-            <CircularProgress />
-          </Box>
-        ) : (
-          <>
-            {/* Recurring Transactions List */}
-            {recurringTransactions.length === 0 ? (
-              <Card>
-                <CardContent sx={{ textAlign: 'center', py: 6 }}>
-                  <RecurringIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-                  <Typography variant="h6" gutterBottom>
-                    No recurring transactions found
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                    Set up recurring transactions to automate your regular income and expenses.
-                  </Typography>
-                  <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreateRecurring}>
-                    Add Your First Recurring Transaction
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    All Recurring Transactions
-                  </Typography>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                    {recurringTransactions.map((recurring, index) => (
-                      <Box key={recurring.id}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Typography variant="subtitle1" fontWeight={600}>
-                              {recurring.payee}
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <>
+              {/* Recurring Transactions List */}
+              {recurringTransactions.length === 0 ? (
+                <Card>
+                  <CardContent sx={{ textAlign: 'center', py: 6 }}>
+                    <RecurringIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+                    <Typography variant="h6" gutterBottom>
+                      No recurring transactions found
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                      Set up recurring transactions to automate your regular income and expenses.
+                    </Typography>
+                    <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreateRecurring}>
+                      Add Your First Recurring Transaction
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      All Recurring Transactions
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                      {recurringTransactions.map((recurring, index) => (
+                        <Box key={recurring.id}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Typography variant="subtitle1" fontWeight={600}>
+                                {recurring.payee}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                ({recurring.category?.name || 'Unknown Category'})
+                              </Typography>
+                              {getStatusChip(recurring)}
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <IconButton
+                                size="small"
+                                onClick={() => handleGenerateTransaction(recurring)}
+                                color="primary"
+                                title="Generate transaction now"
+                              >
+                                <GenerateIcon />
+                              </IconButton>
+                              <IconButton
+                                size="small"
+                                onClick={() => handleEditRecurring(recurring)}
+                                color="primary"
+                              >
+                                <EditIcon />
+                              </IconButton>
+                              <IconButton
+                                size="small"
+                                onClick={() => handleDeleteRecurring(recurring)}
+                                color="error"
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                            </Box>
+                          </Box>
+                          
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                            <Typography variant="body2">
+                              Amount: <span style={{ color: recurring.is_income ? 'green' : 'red' }}>
+                                {recurring.is_income ? '+' : '-'}{formatCurrency(recurring.amount)}
+                              </span>
+                            </Typography>
+                            <Typography variant="body2">
+                              Frequency: {FREQUENCY_LABELS[recurring.frequency]}
+                            </Typography>
+                          </Box>
+                          
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                            <Typography variant="body2" color="text.secondary">
+                              Account: {recurring.account?.name || 'Unknown Account'}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                              ({recurring.category?.name || 'Unknown Category'})
+                              Next: {formatDate(recurring.next_execution_date)}
                             </Typography>
-                            {getStatusChip(recurring)}
                           </Box>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <IconButton
-                              size="small"
-                              onClick={() => handleGenerateTransaction(recurring)}
-                              color="primary"
-                              title="Generate transaction now"
-                            >
-                              <GenerateIcon />
-                            </IconButton>
-                            <IconButton
-                              size="small"
-                              onClick={() => handleEditRecurring(recurring)}
-                              color="primary"
-                            >
-                              <EditIcon />
-                            </IconButton>
-                            <IconButton
-                              size="small"
-                              onClick={() => handleDeleteRecurring(recurring)}
-                              color="error"
-                            >
-                              <DeleteIcon />
-                            </IconButton>
-                          </Box>
+                          
+                          {recurring.notes && (
+                            <Typography variant="caption" color="text.secondary">
+                              Notes: {recurring.notes}
+                            </Typography>
+                          )}
+                          
+                          {index < recurringTransactions.length - 1 && <Divider sx={{ mt: 2 }} />}
                         </Box>
-                        
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                          <Typography variant="body2">
-                            Amount: <span style={{ color: recurring.is_income ? 'green' : 'red' }}>
-                              {recurring.is_income ? '+' : '-'}{formatCurrency(recurring.amount)}
-                            </span>
-                          </Typography>
-                          <Typography variant="body2">
-                            Frequency: {FREQUENCY_LABELS[recurring.frequency]}
-                          </Typography>
-                        </Box>
-                        
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                          <Typography variant="body2" color="text.secondary">
-                            Account: {recurring.account?.name || 'Unknown Account'}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            Next: {formatDate(recurring.next_execution_date)}
-                          </Typography>
-                        </Box>
-                        
-                        {recurring.notes && (
-                          <Typography variant="caption" color="text.secondary">
-                            Notes: {recurring.notes}
-                          </Typography>
-                        )}
-                        
-                        {index < recurringTransactions.length - 1 && <Divider sx={{ mt: 2 }} />}
-                      </Box>
+                      ))}
+                    </Box>
+                  </CardContent>
+                </Card>
+              )}
+            </>
+          )}
+
+          {/* Floating Action Button for Mobile */}
+          <Fab
+            color="primary"
+            aria-label="add recurring transaction"
+            sx={{ position: 'fixed', bottom: 16, right: 16, display: { xs: 'flex', md: 'none' } }}
+            onClick={handleCreateRecurring}
+          >
+            <AddIcon />
+          </Fab>
+        </Container>
+
+        {/* Create/Edit Dialog */}
+        <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
+          <DialogTitle>
+            {editingRecurring ? 'Edit Recurring Transaction' : 'Create Recurring Transaction'}
+          </DialogTitle>
+          <DialogContent>
+            <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <TextField
+                fullWidth
+                label="Payee"
+                value={formData.payee}
+                onChange={(e) => setFormData({ ...formData, payee: e.target.value })}
+                required
+              />
+              
+              <TextField
+                fullWidth
+                label="Amount"
+                type="number"
+                value={formData.amount}
+                onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
+                inputProps={{ step: 0.01 }}
+                required
+                helperText="Positive for income, negative for expense"
+              />
+              
+              <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2 }}>
+                <FormControl fullWidth required>
+                  <InputLabel>Account</InputLabel>
+                  <Select
+                    value={formData.account_id}
+                    label="Account"
+                    onChange={(e) => setFormData({ ...formData, account_id: e.target.value })}
+                  >
+                    {accounts.map((account) => (
+                      <MenuItem key={account.id} value={account.id}>
+                        {account.name}
+                      </MenuItem>
                     ))}
-                  </Box>
-                </CardContent>
-              </Card>
-            )}
-          </>
-        )}
+                  </Select>
+                </FormControl>
 
-        {/* Floating Action Button for Mobile */}
-        <Fab
-          color="primary"
-          aria-label="add recurring transaction"
-          sx={{ position: 'fixed', bottom: 16, right: 16, display: { xs: 'flex', md: 'none' } }}
-          onClick={handleCreateRecurring}
-        >
-          <AddIcon />
-        </Fab>
-      </Container>
-
-      {/* Create/Edit Dialog */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          {editingRecurring ? 'Edit Recurring Transaction' : 'Create Recurring Transaction'}
-        </DialogTitle>
-        <DialogContent>
-          <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <TextField
-              fullWidth
-              label="Payee"
-              value={formData.payee}
-              onChange={(e) => setFormData({ ...formData, payee: e.target.value })}
-              required
-            />
-            
-            <TextField
-              fullWidth
-              label="Amount"
-              type="number"
-              value={formData.amount}
-              onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
-              inputProps={{ step: 0.01 }}
-              required
-              helperText="Positive for income, negative for expense"
-            />
-            
-            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2 }}>
+                <FormControl fullWidth required>
+                  <InputLabel>Category</InputLabel>
+                  <Select
+                    value={formData.category_id}
+                    label="Category"
+                    onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
+                  >
+                    {categories.map((category) => (
+                      <MenuItem key={category.id} value={category.id}>
+                        {category.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+              
               <FormControl fullWidth required>
-                <InputLabel>Account</InputLabel>
+                <InputLabel>Frequency</InputLabel>
                 <Select
-                  value={formData.account_id}
-                  label="Account"
-                  onChange={(e) => setFormData({ ...formData, account_id: e.target.value })}
+                  value={formData.frequency}
+                  label="Frequency"
+                  onChange={(e) => setFormData({ ...formData, frequency: e.target.value as FrequencyType })}
                 >
-                  {accounts.map((account) => (
-                    <MenuItem key={account.id} value={account.id}>
-                      {account.name}
+                  {Object.entries(FREQUENCY_LABELS).map(([value, label]) => (
+                    <MenuItem key={value} value={value}>
+                      {label}
                     </MenuItem>
                   ))}
                 </Select>
               </FormControl>
-
-              <FormControl fullWidth required>
-                <InputLabel>Category</InputLabel>
-                <Select
-                  value={formData.category_id}
-                  label="Category"
-                  onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
-                >
-                  {categories.map((category) => (
-                    <MenuItem key={category.id} value={category.id}>
-                      {category.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Box>
-            
-            <FormControl fullWidth required>
-              <InputLabel>Frequency</InputLabel>
-              <Select
-                value={formData.frequency}
-                label="Frequency"
-                onChange={(e) => setFormData({ ...formData, frequency: e.target.value as FrequencyType })}
-              >
-                {Object.entries(FREQUENCY_LABELS).map(([value, label]) => (
-                  <MenuItem key={value} value={value}>
-                    {label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            
-            <DateTimePicker
-              label="Start Date"
-              value={new Date(formData.start_date)}
-              onChange={(date) => setFormData({ ...formData, start_date: date?.toISOString() || new Date().toISOString() })}
-              slotProps={{
-                textField: {
-                  fullWidth: true,
-                  required: true,
-                },
-              }}
-            />
-            
-            {editingRecurring && (
+              
               <DateTimePicker
-                label="End Date (Optional)"
-                value={formData.end_date ? new Date(formData.end_date) : null}
-                onChange={(date) => setFormData({ ...formData, end_date: date?.toISOString() || undefined })}
+                label="Start Date"
+                value={new Date(formData.start_date)}
+                onChange={(date) => setFormData({ ...formData, start_date: date?.toISOString() || new Date().toISOString() })}
                 slotProps={{
                   textField: {
                     fullWidth: true,
+                    required: true,
                   },
                 }}
               />
-            )}
-            
-            <TextField
-              fullWidth
-              label="Notes (Optional)"
-              value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              multiline
-              rows={2}
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 3 }}>
-          <Button onClick={() => setOpenDialog(false)}>
-            Cancel
-          </Button>
-          <Button variant="contained" onClick={handleSubmit}>
-            {editingRecurring ? 'Update' : 'Create'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+              
+              {editingRecurring && (
+                <DateTimePicker
+                  label="End Date (Optional)"
+                  value={formData.end_date ? new Date(formData.end_date) : null}
+                  onChange={(date) => setFormData({ ...formData, end_date: date?.toISOString() || undefined })}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                    },
+                  }}
+                />
+              )}
+              
+              <TextField
+                fullWidth
+                label="Notes (Optional)"
+                value={formData.notes}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                multiline
+                rows={2}
+              />
+            </Box>
+          </DialogContent>
+          <DialogActions sx={{ px: 3, pb: 3 }}>
+            <Button onClick={() => setOpenDialog(false)}>
+              Cancel
+            </Button>
+            <Button variant="contained" onClick={handleSubmit}>
+              {editingRecurring ? 'Update' : 'Create'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Layout>
     </LocalizationProvider>
   );
 }; 

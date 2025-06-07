@@ -7,10 +7,6 @@ import {
   CardContent,
   Alert,
   CircularProgress,
-  AppBar,
-  Toolbar,
-  Menu,
-  MenuItem,
   IconButton,
   Button,
   Table,
@@ -26,6 +22,7 @@ import {
   FormControl,
   InputLabel,
   Select,
+  MenuItem,
   Tabs,
   Tab,
   Divider,
@@ -35,26 +32,17 @@ import {
   DialogActions,
 } from '@mui/material';
 import {
-  Menu as MenuIcon,
-  Dashboard as DashboardIcon,
-  AccountBalance as AccountIcon,
   Receipt as TransactionIcon,
-  Logout as LogoutIcon,
   Search as SearchIcon,
   TrendingUp as IncomeIcon,
   TrendingDown as ExpenseIcon,
   Add as AddIcon,
-  FilterList as FilterIcon,
   Clear as ClearIcon,
-  TrendingUp as TrendingUpIcon,
   Repeat as RecurringIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  PlayArrow as GenerateIcon,
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
 import { transactionService } from '../services/transactionService';
-import { authService } from '../services/authService';
 import { accountService } from '../services/accountService';
 import { categoryService } from '../services/categoryService';
 import { recurringTransactionService } from '../services/recurringTransactionService';
@@ -64,14 +52,13 @@ import type { RecurringTransaction, RecurringTransactionUpdate } from '../types/
 import { FREQUENCY_LABELS } from '../types/recurringTransaction';
 import { CreateTransactionDialog } from '../components/CreateTransactionDialog';
 import { EditRecurringTransactionDialog } from '../components/EditRecurringTransactionDialog';
+import { Layout } from '../components/Layout';
 
 export const TransactionsPage: React.FC = () => {
-  const navigate = useNavigate();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [recurringTransactions, setRecurringTransactions] = useState<RecurringTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -89,19 +76,7 @@ export const TransactionsPage: React.FC = () => {
     search: '',
   });
 
-  // Navigation handlers
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
 
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleLogout = () => {
-    authService.removeToken();
-    navigate('/login');
-  };
 
   // Load transactions and filter data on component mount
   useEffect(() => {
@@ -299,98 +274,8 @@ export const TransactionsPage: React.FC = () => {
   };
 
   return (
-    <>
-      {/* Navigation Bar */}
-      <AppBar position="sticky">
-        <Toolbar>
-          <Typography variant="h5" component="div" sx={{ flexGrow: 1, fontWeight: 600 }}>
-            Kubera
-          </Typography>
-          
-          {/* Desktop Navigation */}
-          <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-            <Button 
-              color="inherit" 
-              startIcon={<DashboardIcon />} 
-              sx={{ fontSize: '1rem' }}
-              onClick={() => navigate('/dashboard')}
-            >
-              Dashboard
-            </Button>
-            <Button 
-              color="inherit" 
-              startIcon={<AccountIcon />} 
-              sx={{ fontSize: '1rem' }}
-              onClick={() => navigate('/accounts')}
-            >
-              Accounts
-            </Button>
-            <Button 
-              color="inherit" 
-              startIcon={<TransactionIcon />} 
-              sx={{ fontSize: '1rem', bgcolor: 'rgba(255,255,255,0.1)' }}
-            >
-              Transactions
-            </Button>
-            <Button 
-              color="inherit" 
-              startIcon={<TrendingUpIcon />} 
-              sx={{ fontSize: '1rem' }}
-              onClick={() => navigate('/budgets')}
-            >
-              Budgets
-            </Button>
-            <Button 
-              color="inherit" 
-              startIcon={<LogoutIcon />} 
-              sx={{ fontSize: '1rem', ml: 2 }}
-              onClick={handleLogout}
-            >
-              Logout
-            </Button>
-          </Box>
-          
-          {/* Mobile Navigation */}
-          <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
-            <IconButton
-              color="inherit"
-              aria-label="menu"
-              onClick={handleMenuOpen}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={handleMenuClose}
-            >
-              <MenuItem onClick={() => { handleMenuClose(); navigate('/dashboard'); }}>
-                <DashboardIcon sx={{ mr: 1 }} />
-                Dashboard
-              </MenuItem>
-              <MenuItem onClick={() => { handleMenuClose(); navigate('/accounts'); }}>
-                <AccountIcon sx={{ mr: 1 }} />
-                Accounts
-              </MenuItem>
-              <MenuItem onClick={handleMenuClose}>
-                <TransactionIcon sx={{ mr: 1 }} />
-                Transactions
-              </MenuItem>
-              <MenuItem onClick={() => { handleMenuClose(); navigate('/budgets'); }}>
-                <TrendingUpIcon sx={{ mr: 1 }} />
-                Budgets
-              </MenuItem>
-              <MenuItem onClick={() => { handleMenuClose(); handleLogout(); }}>
-                <LogoutIcon sx={{ mr: 1 }} />
-                Logout
-              </MenuItem>
-            </Menu>
-          </Box>
-        </Toolbar>
-      </AppBar>
-
-      {/* Main Content */}
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Layout>
+      <Container maxWidth="lg" sx={{ mt: 0, mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
           <Typography variant="h4" component="h1">
             Transactions
@@ -746,6 +631,6 @@ export const TransactionsPage: React.FC = () => {
           </DialogActions>
         </Dialog>
       </Container>
-    </>
+    </Layout>
   );
 }; 

@@ -1,171 +1,126 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import {
-  AppBar,
   Box,
-  CssBaseline,
-  Drawer,
-  IconButton,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
+  AppBar,
   Toolbar,
+  IconButton,
   Typography,
-  Button,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
-  Dashboard as DashboardIcon,
-  AccountBalance as AccountIcon,
-  Receipt as TransactionIcon,
-  Category as CategoryIcon,
-  TrendingUp as BudgetIcon,
-  Repeat as RecurringIcon,
-  Upload as ImportIcon,
-  Logout as LogoutIcon,
 } from '@mui/icons-material';
-import { useAuth } from '../contexts/AuthContext';
+import Sidebar from './Sidebar';
 
-const drawerWidth = 240;
+const DRAWER_WIDTH = 280;
 
-interface NavigationItem {
-  text: string;
-  icon: React.ReactElement;
-  path: string;
+interface LayoutProps {
+  children: React.ReactNode;
 }
 
-const navigationItems: NavigationItem[] = [
-  { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
-  { text: 'Accounts', icon: <AccountIcon />, path: '/accounts' },
-  { text: 'Transactions', icon: <TransactionIcon />, path: '/transactions' },
-  { text: 'Categories', icon: <CategoryIcon />, path: '/categories' },
-  { text: 'Budgets', icon: <BudgetIcon />, path: '/budgets' },
-  { text: 'Recurring', icon: <RecurringIcon />, path: '/recurring' },
-  { text: 'Import', icon: <ImportIcon />, path: '/import' },
-];
+export const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-export const Layout: React.FC = () => {
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
+  const handleSidebarToggle = () => {
+    setSidebarOpen(!sidebarOpen);
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
-  const handleNavigation = (path: string) => {
-    navigate(path);
-    setMobileOpen(false); // Close mobile drawer after navigation
-  };
-
-  const drawer = (
-    <div>
-      <Toolbar>
-        <Typography variant="h6" noWrap component="div">
-          Budget Tracker
-        </Typography>
-      </Toolbar>
-      <List>
-        {navigationItems.map((item) => (
-          <ListItem key={item.text} disablePadding>
-            <ListItemButton
-              selected={location.pathname === item.path}
-              onClick={() => handleNavigation(item.path)}
-            >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-    </div>
-  );
+  // On desktop, sidebar should be open by default
+  React.useEffect(() => {
+    if (!isMobile) {
+      setSidebarOpen(true);
+    } else {
+      setSidebarOpen(false);
+    }
+  }, [isMobile]);
 
   return (
-    <Box sx={{ display: 'flex' }}>
-      <CssBaseline />
-      <AppBar
-        position="fixed"
-        sx={{
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          ml: { sm: `${drawerWidth}px` },
-        }}
-      >
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            Budget Tracker
-          </Typography>
-          <Typography variant="body2" sx={{ mr: 2 }}>
-            Welcome, {user?.name || 'User'}
-          </Typography>
-          <Button
-            color="inherit"
-            onClick={handleLogout}
-            startIcon={<LogoutIcon />}
-          >
-            Logout
-          </Button>
-        </Toolbar>
-      </AppBar>
-      <Box
-        component="nav"
-        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-      >
-        {/* Mobile drawer */}
-        <Drawer
-          variant="temporary"
-          open={mobileOpen}
-          onClose={handleDrawerToggle}
-          ModalProps={{
-            keepMounted: true, // Better open performance on mobile.
-          }}
+    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+      {/* Mobile AppBar - only show on mobile when sidebar is closed */}
+      {isMobile && !sidebarOpen && (
+        <AppBar
+          position="fixed"
           sx={{
-            display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+            zIndex: theme.zIndex.drawer + 1,
+            backgroundColor: 'white',
+            color: 'text.primary',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
           }}
         >
-          {drawer}
-        </Drawer>
-        {/* Desktop drawer */}
-        <Drawer
-          variant="permanent"
-          sx={{
-            display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
-          }}
-          open
-        >
-          {drawer}
-        </Drawer>
-      </Box>
+          <Toolbar>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              edge="start"
+              onClick={handleSidebarToggle}
+              sx={{ mr: 2 }}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Typography variant="h6" noWrap component="div">
+              Kubera
+            </Typography>
+          </Toolbar>
+        </AppBar>
+      )}
+
+      {/* Sidebar */}
+      <Sidebar open={sidebarOpen} onToggle={handleSidebarToggle} />
+
+      {/* Main Content Area */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          width: '100%',
+          ml: 0,
+          mt: {
+            xs: (isMobile && !sidebarOpen) ? '64px' : 0,
+            md: 0,
+          },
+          transition: theme.transitions.create(['margin', 'width'], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+          }),
+          backgroundColor: theme.palette.grey[50],
+          minHeight: (isMobile && !sidebarOpen) ? 'calc(100vh - 64px)' : '100vh',
         }}
       >
-        <Toolbar />
-        <Outlet />
+        {/* Desktop Toggle Button - only show when sidebar is closed on desktop */}
+        {!isMobile && !sidebarOpen && (
+          <Box
+            sx={{
+              position: 'fixed',
+              top: 20,
+              left: 20,
+              zIndex: theme.zIndex.appBar,
+            }}
+          >
+            <IconButton
+              onClick={handleSidebarToggle}
+              sx={{
+                backgroundColor: 'white',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                '&:hover': {
+                  backgroundColor: theme.palette.grey[50],
+                },
+              }}
+            >
+              <MenuIcon />
+            </IconButton>
+          </Box>
+        )}
+
+        {/* Page Content */}
+        <Box sx={{ p: { xs: 2, md: 3 } }}>
+          {children}
+        </Box>
       </Box>
     </Box>
   );
-}; 
+};
+
+export default Layout; 
