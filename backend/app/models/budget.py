@@ -1,5 +1,4 @@
 from sqlalchemy import Column, String, Numeric, DateTime, ForeignKey, Integer
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 import uuid
 from datetime import datetime
@@ -9,7 +8,7 @@ from ..core.database import Base
 class Budget(Base):
     __tablename__ = "budgets"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
     name = Column(String(100), nullable=False)
     amount = Column(Numeric(precision=10, scale=2), nullable=False)
     spent_amount = Column(Numeric(precision=10, scale=2), default=0)
@@ -19,7 +18,7 @@ class Budget(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Foreign Keys
-    category_id = Column(UUID(as_uuid=True), ForeignKey("categories.id"), nullable=False, index=True)
+    category_id = Column(String(36), ForeignKey("categories.id"), nullable=False, index=True)
     
     # Relationships
     category = relationship("Category", back_populates="budgets")

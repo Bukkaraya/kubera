@@ -1,5 +1,4 @@
 from sqlalchemy import Column, String, Numeric, Boolean, DateTime, ForeignKey, Text
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 import uuid
 from datetime import datetime
@@ -9,7 +8,7 @@ from ..core.database import Base
 class Transaction(Base):
     __tablename__ = "transactions"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
     amount = Column(Numeric(precision=10, scale=2), nullable=False)
     description = Column(String(255), nullable=False)
     notes = Column(Text, nullable=True)
@@ -19,9 +18,9 @@ class Transaction(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Foreign Keys
-    account_id = Column(UUID(as_uuid=True), ForeignKey("accounts.id"), nullable=False, index=True)
-    category_id = Column(UUID(as_uuid=True), ForeignKey("categories.id"), nullable=False, index=True)
-    recurring_transaction_id = Column(UUID(as_uuid=True), ForeignKey("recurring_transactions.id"), nullable=True)
+    account_id = Column(String(36), ForeignKey("accounts.id"), nullable=False, index=True)
+    category_id = Column(String(36), ForeignKey("categories.id"), nullable=False, index=True)
+    recurring_transaction_id = Column(String(36), ForeignKey("recurring_transactions.id"), nullable=True)
     
     # Relationships
     account = relationship("Account", back_populates="transactions")

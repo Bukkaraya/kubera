@@ -1,5 +1,4 @@
 from sqlalchemy import Column, String, Numeric, Boolean, DateTime, Enum
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 import uuid
 from datetime import datetime
@@ -18,7 +17,7 @@ class AccountType(PyEnum):
 class Account(Base):
     __tablename__ = "accounts"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
     name = Column(String(100), nullable=False, index=True)
     account_type = Column(Enum(AccountType), nullable=False)
     initial_balance = Column(Numeric(precision=10, scale=2), nullable=False, default=0)
