@@ -158,7 +158,12 @@ export const AccountsPage: React.FC = () => {
             >
               Accounts
             </Button>
-            <Button color="inherit" startIcon={<TransactionIcon />} sx={{ fontSize: '1rem' }}>
+            <Button 
+              color="inherit" 
+              startIcon={<TransactionIcon />} 
+              sx={{ fontSize: '1rem' }}
+              onClick={() => navigate('/transactions')}
+            >
               Transactions
             </Button>
             <Button 
@@ -193,7 +198,7 @@ export const AccountsPage: React.FC = () => {
                 <AccountIcon sx={{ mr: 1 }} />
                 Accounts
               </MenuItem>
-              <MenuItem onClick={handleMenuClose}>
+              <MenuItem onClick={() => { handleMenuClose(); navigate('/transactions'); }}>
                 <TransactionIcon sx={{ mr: 1 }} />
                 Transactions
               </MenuItem>
