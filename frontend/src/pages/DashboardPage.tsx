@@ -16,7 +16,8 @@ import {
   ListItem,
   ListItemAvatar,
   ListItemText,
-  LinearProgress
+  LinearProgress,
+  useTheme
 } from '@mui/material';
 import { 
   Add as AddIcon,
@@ -38,6 +39,7 @@ import { Layout } from '../components/Layout';
 
 export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
   
   // Dashboard data state
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -65,6 +67,20 @@ export const DashboardPage: React.FC = () => {
     income: number;
     expenses: number;
   }>>([]);
+
+  // Theme-aware chart styling
+  const getTooltipStyle = () => ({
+    backgroundColor: theme.palette.background.paper,
+    border: `1px solid ${theme.palette.divider}`,
+    borderRadius: '8px',
+    boxShadow: theme.palette.mode === 'dark' 
+      ? '0 4px 6px -1px rgba(0, 0, 0, 0.3)' 
+      : '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+    color: theme.palette.text.primary,
+  });
+
+  const getAxisColor = () => theme.palette.text.secondary;
+  const getGridColor = () => theme.palette.divider;
 
   // Load dashboard data
   useEffect(() => {
@@ -411,12 +427,7 @@ export const DashboardPage: React.FC = () => {
                           </Pie>
                           <Tooltip 
                             formatter={(value) => formatCurrency(value as number)}
-                            contentStyle={{
-                              backgroundColor: '#f8fafc',
-                              border: '1px solid #e2e8f0',
-                              borderRadius: '8px',
-                              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                            }}
+                            contentStyle={getTooltipStyle()}
                           />
                           <Legend 
                             wrapperStyle={{
@@ -447,10 +458,10 @@ export const DashboardPage: React.FC = () => {
                     <Box sx={{ height: 400, display: 'flex', alignItems: 'center' }}>
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={spendingTrend} margin={{ top: 20, right: 30, left: 60, bottom: 60 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                          <CartesianGrid strokeDasharray="3 3" stroke={getGridColor()} />
                           <XAxis 
                             dataKey="day" 
-                            stroke="#64748b"
+                            stroke={getAxisColor()}
                             fontSize={12}
                             tick={{ fontSize: 12 }}
                             ticks={[1, 31]}
@@ -462,7 +473,7 @@ export const DashboardPage: React.FC = () => {
                             }}
                           />
                           <YAxis 
-                            stroke="#64748b"
+                            stroke={getAxisColor()}
                             fontSize={12}
                             tick={{ fontSize: 12 }}
                             tickFormatter={(value) => {
@@ -484,12 +495,7 @@ export const DashboardPage: React.FC = () => {
                               name === 'currentMonth' ? 'This Month' : 'Previous Month'
                             ]}
                             labelFormatter={(day) => `Day ${day}`}
-                            contentStyle={{
-                              backgroundColor: '#f8fafc',
-                              border: '1px solid #e2e8f0',
-                              borderRadius: '8px',
-                              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                            }}
+                            contentStyle={getTooltipStyle()}
                           />
                           <Line 
                             type="monotone" 
@@ -546,10 +552,10 @@ export const DashboardPage: React.FC = () => {
                           data={monthlyComparison}
                           margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
                         >
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                          <CartesianGrid strokeDasharray="3 3" stroke={getGridColor()} />
                           <XAxis 
                             dataKey="month" 
-                            stroke="#64748b"
+                            stroke={getAxisColor()}
                             fontSize={12}
                             tick={{ fontSize: 12 }}
                             angle={-45}
@@ -557,7 +563,7 @@ export const DashboardPage: React.FC = () => {
                             height={60}
                           />
                           <YAxis 
-                            stroke="#64748b"
+                            stroke={getAxisColor()}
                             fontSize={12}
                             tick={{ fontSize: 12 }}
                             tickFormatter={(value) => {
@@ -573,14 +579,9 @@ export const DashboardPage: React.FC = () => {
                               name
                             ]}
                             labelFormatter={(month) => month}
-                            contentStyle={{
-                              backgroundColor: '#f8fafc',
-                              border: '1px solid #e2e8f0',
-                              borderRadius: '8px',
-                              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                            }}
+                            contentStyle={getTooltipStyle()}
                           />
-                          <ReferenceLine y={0} stroke="#64748b" strokeDasharray="2 2" />
+                          <ReferenceLine y={0} stroke={getAxisColor()} strokeDasharray="2 2" />
                           <Bar 
                             dataKey="income" 
                             fill="#16a34a" 

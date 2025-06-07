@@ -45,7 +45,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           position="fixed"
           sx={{
             zIndex: theme.zIndex.drawer + 1,
-            backgroundColor: 'white',
+            backgroundColor: theme.palette.background.paper,
             color: 'text.primary',
             boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
           }}
@@ -85,7 +85,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.leavingScreen,
           }),
-          backgroundColor: theme.palette.grey[50],
+          backgroundColor: theme.palette.background.default,
           minHeight: (isMobile && !sidebarOpen) ? 'calc(100vh - 64px)' : '100vh',
         }}
       >
@@ -102,10 +102,12 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             <IconButton
               onClick={handleSidebarToggle}
               sx={{
-                backgroundColor: 'white',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                backgroundColor: theme.palette.background.paper,
+                boxShadow: theme.palette.mode === 'dark' 
+                  ? '0 2px 8px rgba(0,0,0,0.3)' 
+                  : '0 2px 8px rgba(0,0,0,0.15)',
                 '&:hover': {
-                  backgroundColor: theme.palette.grey[50],
+                  backgroundColor: theme.palette.action.hover,
                 },
               }}
             >

@@ -10,9 +10,11 @@ import {
   Box,
   IconButton,
   Divider,
-  useTheme,
+  useTheme as useMuiTheme,
   useMediaQuery,
   Collapse,
+  Switch,
+  FormControlLabel,
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
@@ -24,9 +26,12 @@ import {
   ChevronLeft as ChevronLeftIcon,
   ExpandLess,
   ExpandMore,
+  DarkMode as DarkModeIcon,
+  LightMode as LightModeIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authService } from '../services/authService';
+import { useThemeMode } from '../contexts/ThemeContext';
 
 const DRAWER_WIDTH = 280;
 
@@ -38,8 +43,9 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ open, onToggle }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const theme = useTheme();
+  const theme = useMuiTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { mode, toggleTheme } = useThemeMode();
 
   const handleLogout = () => {
     authService.removeToken();
@@ -145,6 +151,28 @@ export const Sidebar: React.FC<SidebarProps> = ({ open, onToggle }) => {
       {/* Bottom Actions */}
       <Box sx={{ borderTop: `1px solid ${theme.palette.divider}` }}>
         <List sx={{ px: 1, py: 2 }}>
+          {/* Dark Mode Toggle */}
+          <ListItem sx={{ px: 2, py: 1 }}>
+            <ListItemIcon sx={{ minWidth: 40 }}>
+              {mode === 'dark' ? <DarkModeIcon /> : <LightModeIcon />}
+            </ListItemIcon>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={mode === 'dark'}
+                  onChange={toggleTheme}
+                  size="small"
+                />
+              }
+              label={
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                  Dark Mode
+                </Typography>
+              }
+              sx={{ ml: 0, mr: 0 }}
+            />
+          </ListItem>
+          
           <ListItem disablePadding>
             <ListItemButton
               onClick={handleLogout}
