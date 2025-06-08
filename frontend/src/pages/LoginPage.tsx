@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Container,
   Paper,
@@ -13,10 +13,19 @@ import { authService } from '../services/authService';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (authService.isAuthenticated()) {
+      const from = (location.state as { from?: string })?.from || '/dashboard';
+      navigate(from, { replace: true });
+    }
+  }, [navigate, location]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,8 +46,9 @@ export const LoginPage: React.FC = () => {
       // Save the token
       authService.saveToken(response.access_token);
       
-      // Navigate to dashboard on successful login
-      navigate('/dashboard');
+      // Navigate to the page they were trying to access, or dashboard as default
+      const from = (location.state as { from?: string })?.from || '/dashboard';
+      navigate(from, { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed. Please try again.');
     } finally {

@@ -7,6 +7,13 @@ import { AccountsPage } from './pages/AccountsPage';
 import { TransactionsPage } from './pages/TransactionsPage';
 import { BudgetsPage } from './pages/BudgetsPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { authService } from './services/authService';
+
+// Component to handle root redirect
+const RootRedirect: React.FC = () => {
+  const isAuthenticated = authService.isAuthenticated();
+  return <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />;
+};
 
 function App() {
   return (
@@ -47,7 +54,7 @@ function App() {
               </ProtectedRoute>
             } 
           />
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/" element={<RootRedirect />} />
         </Routes>
       </Router>
     </ThemeProvider>

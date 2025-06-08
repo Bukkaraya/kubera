@@ -1,12 +1,11 @@
 import axios from 'axios';
 import type { Transaction, TransactionCreate, TransactionFilter, TransactionSummary, CategorySummary } from '../types/transaction';
 import { authService } from './authService';
-
-const API_BASE_URL = 'http://localhost:8000';
+import { API_CONFIG } from '../config/api';
 
 // Create axios instance with auth interceptor
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_CONFIG.BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },

@@ -13,12 +13,11 @@ import type {
   PaginatedResponse,
 } from '../types';
 import type { Budget } from '../types/budget';
-
-const API_BASE_URL = 'http://localhost:8000';
+import { API_CONFIG } from '../config/api';
 
 // Create axios instance
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_CONFIG.BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -50,7 +49,7 @@ class ApiService {
   private baseURL: string;
 
   constructor() {
-    this.baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+    this.baseURL = API_CONFIG.BASE_URL;
     
     this.api = axios.create({
       baseURL: this.baseURL,
@@ -88,20 +87,20 @@ class ApiService {
 
   // Token management
   private getToken(): string | null {
-    return localStorage.getItem('auth_token');
+    return localStorage.getItem('access_token');
   }
 
   private setToken(token: string): void {
-    localStorage.setItem('auth_token', token);
+    localStorage.setItem('access_token', token);
   }
 
   private removeToken(): void {
-    localStorage.removeItem('auth_token');
+    localStorage.removeItem('access_token');
   }
 
   // Authentication endpoints
   async login(credentials: LoginRequest): Promise<LoginResponse> {
-    const response: AxiosResponse<LoginResponse> = await this.api.post('/login', credentials);
+    const response: AxiosResponse<LoginResponse> = await this.api.post('/api/auth/login', credentials);
     this.setToken(response.data.access_token);
     return response.data;
   }

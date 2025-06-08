@@ -1,6 +1,5 @@
 import axios from 'axios';
-
-const API_BASE_URL = 'http://localhost:8000';
+import { API_CONFIG } from '../config/api';
 
 // Types for authentication
 export interface LoginRequest {
@@ -17,7 +16,7 @@ export interface LoginResponse {
 export const authService = {
   login: async (credentials: LoginRequest): Promise<LoginResponse> => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, credentials);
+      const response = await axios.post(`${API_CONFIG.BASE_URL}/api/auth/login`, credentials);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
