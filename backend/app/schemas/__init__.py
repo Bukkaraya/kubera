@@ -4,6 +4,8 @@ from .account import AccountCreate, AccountUpdate, AccountResponse
 from .transaction import TransactionCreate, TransactionUpdate, TransactionResponse
 from .recurring_transaction import RecurringTransactionCreate, RecurringTransactionUpdate, RecurringTransactionResponse
 from .budget import BudgetCreate, BudgetUpdate, BudgetResponse
+from .transfer import TransferCreate, TransferResponse
+from .goal import GoalCreate, GoalUpdate, GoalProgressUpdate, GoalResponse, GoalSummary, GoalStats
 
 __all__ = [
     "Token",
@@ -23,5 +25,13 @@ __all__ = [
     "RecurringTransactionResponse",
     "BudgetCreate",
     "BudgetUpdate",
-    "BudgetResponse"
+    "BudgetResponse",
+    "TransferCreate",
+    "TransferResponse",
+    "GoalCreate",
+    "GoalUpdate",
+    "GoalProgressUpdate",
+    "GoalResponse",
+    "GoalSummary",
+    "GoalStats"
 ]

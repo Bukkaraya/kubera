@@ -30,6 +30,7 @@ class Account(Base):
     # Relationships
     transactions = relationship("Transaction", back_populates="account")
     recurring_transactions = relationship("RecurringTransaction", back_populates="account")
+    goals = relationship("Goal", back_populates="account")
     
     def __repr__(self):
         return f"<Account(name='{self.name}', type='{self.account_type.value}')>"

@@ -3,8 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from .core.config import settings
 from .core.database import Base, engine
 # Import all models to ensure they're registered with SQLAlchemy
-from .models import account, transaction, category, recurring_transaction, budget, transfer
-from .api.endpoints import auth, categories, accounts, transactions, recurring_transactions, budgets, transfers
+from .models import account, transaction, category, recurring_transaction, budget, transfer, goal
+from .api.endpoints import auth, categories, accounts, transactions, recurring_transactions, budgets, transfers, goals
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -34,6 +34,7 @@ app.include_router(transactions.router, prefix="/api/transactions", tags=["trans
 app.include_router(recurring_transactions.router, prefix="/api/recurring-transactions", tags=["recurring-transactions"])
 app.include_router(budgets.router, prefix="/api/budgets", tags=["budgets"])
 app.include_router(transfers.router, prefix="/api/transfers", tags=["transfers"])
+app.include_router(goals.router, prefix="/api/goals", tags=["goals"])
 
 
 @app.get("/")

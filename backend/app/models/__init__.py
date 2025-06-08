@@ -3,6 +3,8 @@ from .account import Account, AccountType
 from .transaction import Transaction
 from .recurring_transaction import RecurringTransaction, FrequencyType
 from .budget import Budget
+from .transfer import Transfer
+from .goal import Goal, GoalType, GoalStatus
 
 __all__ = [
     "Category",
@@ -11,5 +13,9 @@ __all__ = [
     "Transaction",
     "RecurringTransaction",
     "FrequencyType",
-    "Budget"
+    "Budget",
+    "Transfer",
+    "Goal",
+    "GoalType",
+    "GoalStatus"
 ]

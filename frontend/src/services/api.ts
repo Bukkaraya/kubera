@@ -11,6 +11,12 @@ import type {
   TransactionFilters,
   ApiResponse,
   PaginatedResponse,
+  Goal,
+  GoalCreate,
+  GoalUpdate,
+  GoalProgressUpdate,
+  GoalStats,
+  GoalFilters,
 } from '../types';
 import type { Budget } from '../types/budget';
 import { API_CONFIG } from '../config/api';
@@ -224,6 +230,66 @@ class ApiService {
 
   async deleteBudget(id: string): Promise<void> {
     await this.api.delete(`/budgets/${id}`);
+  }
+
+  // Goals endpoints
+  async getGoals(filters?: GoalFilters): Promise<Goal[]> {
+    const params = new URLSearchParams();
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          params.append(key, value.toString());
+        }
+      });
+    }
+    
+    const response: AxiosResponse<Goal[]> = await this.api.get(`/api/goals?${params}`);
+    return response.data;
+  }
+
+  async getGoal(id: string): Promise<Goal> {
+    const response: AxiosResponse<Goal> = await this.api.get(`/api/goals/${id}`);
+    return response.data;
+  }
+
+  async createGoal(goal: GoalCreate): Promise<Goal> {
+    const response: AxiosResponse<Goal> = await this.api.post('/api/goals', goal);
+    return response.data;
+  }
+
+  async updateGoal(id: string, goal: GoalUpdate): Promise<Goal> {
+    const response: AxiosResponse<Goal> = await this.api.put(`/api/goals/${id}`, goal);
+    return response.data;
+  }
+
+  async updateGoalProgress(id: string, progress: GoalProgressUpdate): Promise<Goal> {
+    const response: AxiosResponse<Goal> = await this.api.put(`/api/goals/${id}/progress`, progress);
+    return response.data;
+  }
+
+  async completeGoal(id: string): Promise<Goal> {
+    const response: AxiosResponse<Goal> = await this.api.put(`/api/goals/${id}/complete`);
+    return response.data;
+  }
+
+  async deleteGoal(id: string): Promise<void> {
+    await this.api.delete(`/api/goals/${id}`);
+  }
+
+  async getGoalStats(accountId?: string): Promise<GoalStats> {
+    const params = accountId ? `?account_id=${accountId}` : '';
+    const response: AxiosResponse<GoalStats> = await this.api.get(`/api/goals/stats${params}`);
+    return response.data;
+  }
+
+  async getOverdueGoals(): Promise<Goal[]> {
+    const response: AxiosResponse<Goal[]> = await this.api.get('/api/goals/overdue');
+    return response.data;
+  }
+
+  async getNearCompletionGoals(threshold: number = 90): Promise<Goal[]> {
+    const response: AxiosResponse<Goal[]> = await this.api.get(`/api/goals/near-completion?threshold=${threshold}`);
+    return response.data;
   }
 
   // Import endpoint

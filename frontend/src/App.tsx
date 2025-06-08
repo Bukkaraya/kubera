@@ -6,6 +6,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { AccountsPage } from './pages/AccountsPage';
 import { TransactionsPage } from './pages/TransactionsPage';
 import { BudgetsPage } from './pages/BudgetsPage';
+import { GoalsPage } from './pages/GoalsPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { authService } from './services/authService';
 
@@ -51,6 +52,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <BudgetsPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/goals" 
+            element={
+              <ProtectedRoute>
+                <GoalsPage />
               </ProtectedRoute>
             } 
           />

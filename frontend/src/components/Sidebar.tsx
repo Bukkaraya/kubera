@@ -21,6 +21,7 @@ import {
   AccountBalance as AccountIcon,
   Receipt as TransactionIcon,
   TrendingUp as BudgetIcon,
+  Flag as GoalIcon,
   Logout as LogoutIcon,
   Menu as MenuIcon,
   ChevronLeft as ChevronLeftIcon,
@@ -76,6 +77,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ open, onToggle }) => {
       icon: <BudgetIcon />,
       path: '/budgets',
       onClick: () => navigate('/budgets'),
+    },
+    {
+      label: 'Goals',
+      icon: <GoalIcon />,
+      path: '/goals',
+      onClick: () => navigate('/goals'),
     },
   ];
 
