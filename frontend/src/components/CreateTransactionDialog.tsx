@@ -16,6 +16,7 @@ import {
   Typography,
 } from '@mui/material';
 import { AmountInput } from './AmountInput';
+import { CategorySelect } from './CategorySelect';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -208,20 +209,14 @@ export const CreateTransactionDialog: React.FC<CreateTransactionDialogProps> = (
                   </Select>
                 </FormControl>
 
-                <FormControl fullWidth required disabled={loading || loadingData}>
-                  <InputLabel>Category</InputLabel>
-                  <Select
-                    value={formData.category_id}
-                    label="Category"
-                    onChange={handleInputChange('category_id')}
-                  >
-                    {categories.map((category) => (
-                      <MenuItem key={category.id} value={category.id}>
-                        {category.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                <CategorySelect
+                  value={formData.category_id}
+                  onChange={(value) => setFormData(prev => ({ ...prev, category_id: value }))}
+                  categories={categories}
+                  onCategoriesChange={setCategories}
+                  disabled={loading || loadingData}
+                  required
+                />
               </Box>
 
               {/* Date */}

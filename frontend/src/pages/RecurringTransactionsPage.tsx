@@ -48,6 +48,7 @@ import type { Account } from '../types/account';
 import type { Category } from '../types/transaction';
 import { Layout } from '../components/Layout';
 import { AmountInput } from '../components/AmountInput';
+import { CategorySelect } from '../components/CategorySelect';
 
 export const RecurringTransactionsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -386,20 +387,13 @@ export const RecurringTransactionsPage: React.FC = () => {
                   </Select>
                 </FormControl>
 
-                <FormControl fullWidth required>
-                  <InputLabel>Category</InputLabel>
-                  <Select
-                    value={formData.category_id}
-                    label="Category"
-                    onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
-                  >
-                    {categories.map((category) => (
-                      <MenuItem key={category.id} value={category.id}>
-                        {category.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                <CategorySelect
+                  value={formData.category_id}
+                  onChange={(value) => setFormData({ ...formData, category_id: value })}
+                  categories={categories}
+                  onCategoriesChange={setCategories}
+                  required
+                />
               </Box>
               
               <FormControl fullWidth required>

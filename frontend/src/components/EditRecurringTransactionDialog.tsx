@@ -17,6 +17,7 @@ import {
   Typography,
 } from '@mui/material';
 import { AmountInput } from './AmountInput';
+import { CategorySelect } from './CategorySelect';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -221,21 +222,14 @@ export const EditRecurringTransactionDialog: React.FC<EditRecurringTransactionDi
                   </Select>
                 </FormControl>
 
-                <FormControl fullWidth required>
-                  <InputLabel>Category</InputLabel>
-                  <Select
-                    value={formData.category_id || ''}
-                    label="Category"
-                    onChange={(e) => setFormData(prev => ({ ...prev, category_id: e.target.value }))}
-                    disabled={loading || loadingData}
-                  >
-                    {categories.map((category) => (
-                      <MenuItem key={category.id} value={category.id}>
-                        {category.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                <CategorySelect
+                  value={formData.category_id || ''}
+                  onChange={(value) => setFormData(prev => ({ ...prev, category_id: value }))}
+                  categories={categories}
+                  onCategoriesChange={setCategories}
+                  disabled={loading || loadingData}
+                  required
+                />
               </Box>
 
               {/* Frequency */}

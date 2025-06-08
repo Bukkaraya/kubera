@@ -38,6 +38,7 @@ import {
   Error as ErrorIcon,
   Warning as WarningIcon,
   Info as InfoIcon,
+  Add as AddIcon,
 } from '@mui/icons-material';
 import type { Account } from '../types/account';
 import type { Category } from '../types/transaction';
@@ -51,6 +52,7 @@ import type {
 import { accountService } from '../services/accountService';
 import { categoryService } from '../services/categoryService';
 import { transactionService } from '../services/transactionService';
+import { CategorySelect } from './CategorySelect';
 
 interface CSVUploadDialogProps {
   open: boolean;
@@ -85,6 +87,13 @@ export const CSVUploadDialog: React.FC<CSVUploadDialogProps> = ({
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingData, setLoadingData] = useState(false);
+
+  // Category creation state for CSV preview
+  const [createCategoryDialogOpen, setCreateCategoryDialogOpen] = useState(false);
+  const [newCategoryData, setNewCategoryData] = useState({ name: '', description: '' });
+  const [creatingCategory, setCreatingCategory] = useState(false);
+  const [categoryCreationError, setCategoryCreationError] = useState('');
+  const [pendingRowNumber, setPendingRowNumber] = useState<number | null>(null);
 
   // Load accounts and categories when dialog opens
   useEffect(() => {
@@ -123,6 +132,11 @@ export const CSVUploadDialog: React.FC<CSVUploadDialogProps> = ({
     setUploadResult(null);
     setError('');
     setTransactionCategories({});
+    // Reset category creation state
+    setCreateCategoryDialogOpen(false);
+    setNewCategoryData({ name: '', description: '' });
+    setCategoryCreationError('');
+    setPendingRowNumber(null);
   };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -216,6 +230,56 @@ export const CSVUploadDialog: React.FC<CSVUploadDialogProps> = ({
     }
   };
 
+  // Category creation handlers for CSV preview
+  const handleOpenCategoryCreation = (rowNumber: number) => {
+    setPendingRowNumber(rowNumber);
+    setCreateCategoryDialogOpen(true);
+  };
+
+  const handleCreateCategoryInPreview = async () => {
+    if (!newCategoryData.name.trim()) {
+      setCategoryCreationError('Category name is required');
+      return;
+    }
+
+    try {
+      setCreatingCategory(true);
+      setCategoryCreationError('');
+      
+      const newCategory = await categoryService.createCategory({
+        name: newCategoryData.name.trim(),
+        description: newCategoryData.description.trim() || undefined,
+      });
+      
+      // Add new category to the list
+      const updatedCategories = [...categories, newCategory];
+      setCategories(updatedCategories);
+      
+      // Select the new category for the pending row
+      if (pendingRowNumber !== null) {
+        setTransactionCategories(prev => ({
+          ...prev,
+          [pendingRowNumber]: newCategory.id
+        }));
+      }
+      
+      // Close dialog and reset form
+      handleCloseCategoryCreation();
+    } catch (err) {
+      setCategoryCreationError(err instanceof Error ? err.message : 'Failed to create category');
+    } finally {
+      setCreatingCategory(false);
+    }
+  };
+
+  const handleCloseCategoryCreation = () => {
+    setCreateCategoryDialogOpen(false);
+    setNewCategoryData({ name: '', description: '' });
+    setCategoryCreationError('');
+    setPendingRowNumber(null);
+    setCreatingCategory(false);
+  };
+
   const renderFileSelection = () => (
     <Box sx={{ py: 4 }}>
       <Box sx={{ textAlign: 'center', mb: 4 }}>
@@ -270,21 +334,15 @@ export const CSVUploadDialog: React.FC<CSVUploadDialogProps> = ({
             </Select>
           </FormControl>
 
-          <FormControl fullWidth required>
-            <InputLabel>Default Category</InputLabel>
-            <Select
-              value={uploadConfig.default_category_id}
-              onChange={(e) => setUploadConfig(prev => ({ ...prev, default_category_id: e.target.value }))}
-              label="Default Category"
-              disabled={loadingData}
-            >
-              {categories.map((category) => (
-                <MenuItem key={category.id} value={category.id}>
-                  {category.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <CategorySelect
+            value={uploadConfig.default_category_id}
+            onChange={(value) => setUploadConfig(prev => ({ ...prev, default_category_id: value }))}
+            categories={categories}
+            onCategoriesChange={setCategories}
+            required
+            label="Default Category"
+            disabled={loadingData}
+          />
         </Box>
       )}
     </Box>
@@ -379,10 +437,15 @@ export const CSVUploadDialog: React.FC<CSVUploadDialogProps> = ({
                           <Select
                             value={transactionCategories[row.row_number] || ''}
                             onChange={(e) => {
-                              setTransactionCategories(prev => ({
-                                ...prev,
-                                [row.row_number!]: e.target.value
-                              }));
+                              const selectedValue = e.target.value;
+                              if (selectedValue === '__add_new__') {
+                                handleOpenCategoryCreation(row.row_number!);
+                              } else {
+                                setTransactionCategories(prev => ({
+                                  ...prev,
+                                  [row.row_number!]: selectedValue
+                                }));
+                              }
                             }}
                             displayEmpty
                           >
@@ -391,6 +454,13 @@ export const CSVUploadDialog: React.FC<CSVUploadDialogProps> = ({
                                 {category.name}
                               </MenuItem>
                             ))}
+                            <Divider />
+                            <MenuItem value="__add_new__">
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <AddIcon fontSize="small" />
+                                Add New Category
+                              </Box>
+                            </MenuItem>
                           </Select>
                         </FormControl>
                       ) : (
@@ -612,6 +682,66 @@ export const CSVUploadDialog: React.FC<CSVUploadDialogProps> = ({
           </Button>
         )}
       </DialogActions>
+    
+      {/* Category Creation Dialog */}
+      <Dialog 
+        open={createCategoryDialogOpen} 
+        onClose={handleCloseCategoryCreation}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Create New Category</DialogTitle>
+        
+        <DialogContent>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+            {categoryCreationError && (
+              <Alert severity="error">
+                {categoryCreationError}
+              </Alert>
+            )}
+
+            <TextField
+              label="Category Name"
+              value={newCategoryData.name}
+              onChange={(e) => setNewCategoryData(prev => ({ ...prev, name: e.target.value }))}
+              fullWidth
+              required
+              disabled={creatingCategory}
+              placeholder="e.g., Groceries, Entertainment"
+              inputProps={{ maxLength: 100 }}
+              autoFocus
+            />
+
+            <TextField
+              label="Description (Optional)"
+              value={newCategoryData.description}
+              onChange={(e) => setNewCategoryData(prev => ({ ...prev, description: e.target.value }))}
+              fullWidth
+              multiline
+              rows={2}
+              disabled={creatingCategory}
+              placeholder="Optional description for this category"
+              inputProps={{ maxLength: 255 }}
+            />
+          </Box>
+        </DialogContent>
+
+        <DialogActions>
+          <Button 
+            onClick={handleCloseCategoryCreation} 
+            disabled={creatingCategory}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleCreateCategoryInPreview}
+            variant="contained"
+            disabled={creatingCategory || !newCategoryData.name.trim()}
+          >
+            {creatingCategory ? 'Creating...' : 'Create Category'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Dialog>
   );
   } catch (error) {

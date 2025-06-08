@@ -34,6 +34,19 @@ export const categoryService = {
     }
   },
 
+  // Create a new category
+  createCategory: async (categoryData: { name: string; description?: string }): Promise<Category> => {
+    try {
+      const response = await api.post('/api/categories', categoryData);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.detail || 'Failed to create category');
+      }
+      throw new Error('Network error');
+    }
+  },
+
   // Seed predefined categories (useful for first-time setup)
   seedCategories: async (): Promise<void> => {
     try {
