@@ -30,6 +30,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  ButtonGroup,
 } from '@mui/material';
 import {
   Receipt as TransactionIcon,
@@ -41,6 +42,7 @@ import {
   Repeat as RecurringIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
+  CloudUpload as CloudUploadIcon,
 } from '@mui/icons-material';
 import { transactionService } from '../services/transactionService';
 import { accountService } from '../services/accountService';
@@ -52,6 +54,7 @@ import type { RecurringTransaction, RecurringTransactionUpdate } from '../types/
 import { FREQUENCY_LABELS } from '../types/recurringTransaction';
 import { CreateTransactionDialog } from '../components/CreateTransactionDialog';
 import { EditRecurringTransactionDialog } from '../components/EditRecurringTransactionDialog';
+import { CSVUploadDialog } from '../components/CSVUploadDialog';
 import { Layout } from '../components/Layout';
 
 export const TransactionsPage: React.FC = () => {
@@ -61,6 +64,7 @@ export const TransactionsPage: React.FC = () => {
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [csvUploadDialogOpen, setCsvUploadDialogOpen] = useState(false);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [currentTab, setCurrentTab] = useState(0);
@@ -192,6 +196,12 @@ export const TransactionsPage: React.FC = () => {
     }
   };
 
+  const handleCSVUploadSuccess = () => {
+    setCsvUploadDialogOpen(false);
+    // Reload transactions to show the newly imported ones
+    loadTransactions(filters);
+  };
+
   // Tab handlers
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setCurrentTab(newValue);
@@ -280,13 +290,30 @@ export const TransactionsPage: React.FC = () => {
           <Typography variant="h4" component="h1">
             Transactions
           </Typography>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => setCreateDialogOpen(true)}
-          >
-            {currentTab === 0 ? 'Add Transaction' : 'Add Recurring Transaction'}
-          </Button>
+          {currentTab === 0 ? (
+            <ButtonGroup variant="contained">
+              <Button
+                startIcon={<AddIcon />}
+                onClick={() => setCreateDialogOpen(true)}
+              >
+                Add Transaction
+              </Button>
+              <Button
+                startIcon={<CloudUploadIcon />}
+                onClick={() => setCsvUploadDialogOpen(true)}
+              >
+                Upload CSV
+              </Button>
+            </ButtonGroup>
+          ) : (
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => setCreateDialogOpen(true)}
+            >
+              Add Recurring Transaction
+            </Button>
+          )}
         </Box>
 
         {/* Tabs */}
@@ -582,6 +609,12 @@ export const TransactionsPage: React.FC = () => {
           open={createDialogOpen}
           onClose={() => setCreateDialogOpen(false)}
           onSubmit={handleCreateTransaction}
+        />
+
+        <CSVUploadDialog
+          open={csvUploadDialogOpen}
+          onClose={() => setCsvUploadDialogOpen(false)}
+          onSuccess={handleCSVUploadSuccess}
         />
 
         {/* Edit Recurring Transaction Dialog */}

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Transaction, TransactionCreate, TransactionFilter, TransactionSummary, CategorySummary } from '../types/transaction';
+import type { Transaction, TransactionCreate, TransactionFilter, TransactionSummary, CategorySummary, CSVUploadRequest, CSVUploadResponse, CSVPreviewResponse } from '../types/transaction';
 import { authService } from './authService';
 import { API_CONFIG } from '../config/api';
 
@@ -118,6 +118,64 @@ export const transactionService = {
     } catch (error) {
       if (axios.isAxiosError(error)) {
         throw new Error(error.response?.data?.detail || 'Failed to fetch category summary');
+      }
+      throw new Error('Network error');
+    }
+  },
+
+  // Upload CSV file
+  uploadCSV: async (
+    file: File,
+    uploadRequest: CSVUploadRequest
+  ): Promise<CSVUploadResponse> => {
+    try {
+      const formData = new FormData();
+      formData.append('csv_file', file);
+      formData.append('account_id', uploadRequest.account_id);
+      formData.append('default_category_id', uploadRequest.default_category_id);
+      formData.append('skip_header', uploadRequest.skip_header.toString());
+      formData.append('date_format', uploadRequest.date_format);
+      
+      // Add transaction categories as JSON string if provided
+      if (uploadRequest.transaction_categories) {
+        formData.append('transaction_categories', JSON.stringify(uploadRequest.transaction_categories));
+      }
+
+      const response = await api.post('/api/transactions/upload-csv', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.detail || 'Failed to upload CSV file');
+      }
+      throw new Error('Network error');
+    }
+  },
+
+  // Preview CSV file
+  previewCSV: async (
+    file: File,
+    skipHeader: boolean = false,
+    dateFormat: string = '%Y-%m-%d'
+  ): Promise<CSVPreviewResponse> => {
+    try {
+      const formData = new FormData();
+      formData.append('csv_file', file);
+      formData.append('skip_header', skipHeader.toString());
+      formData.append('date_format', dateFormat);
+
+      const response = await api.post('/api/transactions/preview-csv', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.detail || 'Failed to preview CSV file');
       }
       throw new Error('Network error');
     }

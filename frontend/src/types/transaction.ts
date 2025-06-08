@@ -64,4 +64,48 @@ export interface CategorySummary {
   total_amount: number;
   transaction_count: number;
   percentage: number;
+}
+
+// CSV Upload Related Types
+export interface CSVUploadRequest {
+  account_id: string;
+  default_category_id: string;
+  skip_header: boolean;
+  date_format: string;
+  transaction_categories?: Record<number, string>;
+}
+
+export interface CSVTransactionError {
+  row_number: number;
+  error_message: string;
+  raw_data?: string;
+}
+
+export interface CSVUploadResponse {
+  success: boolean;
+  total_rows: number;
+  successful_imports: number;
+  failed_imports: number;
+  errors: CSVTransactionError[];
+  imported_transaction_ids: string[];
+  message: string;
+}
+
+export interface CSVPreviewRow {
+  row_number: number;
+  transaction_date: string;
+  payee: string;
+  amount: number | string;
+  parsed_date?: string;
+  is_valid: boolean;
+  errors: string[];
+}
+
+export interface CSVPreviewResponse {
+  total_rows: number;
+  preview_rows: CSVPreviewRow[];
+  has_header: boolean;
+  detected_format: string;
+  estimated_valid_rows: number;
+  validation_errors: string[];
 } 
