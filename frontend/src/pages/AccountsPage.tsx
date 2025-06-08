@@ -18,12 +18,16 @@ import {
   Savings as SavingsIcon,
   TrendingUp as InvestmentIcon,
   Money as CashIcon,
+  SwapHoriz as TransferIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { accountService } from '../services/accountService';
 import { authService } from '../services/authService';
 import type { Account, AccountType, AccountCreate } from '../types/account';
+import type { TransferCreate } from '../types/transfer';
 import { CreateAccountDialog } from '../components/CreateAccountDialog';
+import { TransferForm } from '../components/TransferForm';
+import { transferService } from '../services/transferService';
 import { Layout } from '../components/Layout';
 
 export const AccountsPage: React.FC = () => {
@@ -32,6 +36,7 @@ export const AccountsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [transferFormOpen, setTransferFormOpen] = useState(false);
 
   // Load accounts on component mount
   useEffect(() => {
@@ -58,6 +63,17 @@ export const AccountsPage: React.FC = () => {
       setCreateDialogOpen(false);
     } catch (err) {
       throw err; // Let the dialog handle the error display
+    }
+  };
+
+  const handleCreateTransfer = async (transferData: TransferCreate) => {
+    try {
+      await transferService.createTransfer(transferData);
+      setTransferFormOpen(false);
+      // Reload accounts to reflect updated balances
+      loadAccounts();
+    } catch (err) {
+      throw err; // Let the form handle the error display
     }
   };
 
@@ -117,13 +133,23 @@ export const AccountsPage: React.FC = () => {
           <Typography variant="h4" component="h1">
             Accounts
           </Typography>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => setCreateDialogOpen(true)}
-          >
-            Add Account
-          </Button>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button
+              variant="outlined"
+              startIcon={<TransferIcon />}
+              onClick={() => setTransferFormOpen(true)}
+              disabled={accounts.length < 2}
+            >
+              Transfer
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => setCreateDialogOpen(true)}
+            >
+              Add Account
+            </Button>
+          </Box>
         </Box>
 
         {error && (
@@ -210,6 +236,13 @@ export const AccountsPage: React.FC = () => {
           open={createDialogOpen}
           onClose={() => setCreateDialogOpen(false)}
           onSubmit={handleCreateAccount}
+        />
+
+        {/* Transfer Form Dialog */}
+        <TransferForm
+          open={transferFormOpen}
+          onClose={() => setTransferFormOpen(false)}
+          onSubmit={handleCreateTransfer}
         />
       </Container>
     </Layout>

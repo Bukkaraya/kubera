@@ -54,6 +54,7 @@ function App() {
               </ProtectedRoute>
             } 
           />
+
           <Route path="/" element={<RootRedirect />} />
         </Routes>
       </Router>
