@@ -1,0 +1,116 @@
+version: '3.8'
+
+services:
+  # Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: kubera-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: kubera_prod
+      POSTGRES_USER: kubera_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_HOST_AUTH_METHOD: md5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backup:/backup
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kubera_user -d kubera_prod"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - kubera-network
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    container_name: kubera-api
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://kubera_user:${DB_PASSWORD}@postgres:5432/kubera_prod
+      - SECRET_KEY=${SECRET_KEY}
+      - ENVIRONMENT=production
+      - CORS_ORIGINS=https://${DOMAIN_NAME},https://www.${DOMAIN_NAME}
+      - LOG_LEVEL=INFO
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./logs:/app/logs
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - kubera-network
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        - REACT_APP_API_URL=https://${DOMAIN_NAME}/api
+        - REACT_APP_ENVIRONMENT=production
+    container_name: kubera-frontend
+    restart: unless-stopped
+    volumes:
+      - frontend_build:/usr/share/nginx/html
+    networks:
+      - kubera-network
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: kubera-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - frontend_build:/usr/share/nginx/html:ro
+      - ./logs/nginx:/var/log/nginx
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - kubera-network
+
+  # Database Backup Service
+  db-backup:
+    image: postgres:15-alpine
+    container_name: kubera-backup
+    restart: "no"
+    environment:
+      PGPASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./backup:/backup
+      - ./scripts:/scripts:ro
+    depends_on:
+      - postgres
+    networks:
+      - kubera-network
+    command: /scripts/backup.sh
+    profiles:
+      - backup
+
+volumes:
+  postgres_data:
+    driver: local
+  frontend_build:
+    driver: local
+
+networks:
+  kubera-network:
+    driver: bridge 
