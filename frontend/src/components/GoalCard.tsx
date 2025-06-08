@@ -51,6 +51,7 @@ export const GoalCard: React.FC<GoalCardProps> = ({
 }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [showProgressDialog, setShowProgressDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [newProgress, setNewProgress] = useState(goal.current_amount);
 
   const formatCurrency = (amount: number): string => {
@@ -112,6 +113,11 @@ export const GoalCard: React.FC<GoalCardProps> = ({
   const handleProgressUpdate = () => {
     onUpdateProgress(goal.id, { current_amount: newProgress });
     setShowProgressDialog(false);
+  };
+
+  const handleDeleteConfirm = () => {
+    onDelete(goal.id);
+    setShowDeleteDialog(false);
   };
 
   const isOverdue = () => {
@@ -401,7 +407,7 @@ export const GoalCard: React.FC<GoalCardProps> = ({
           Edit Goal
         </MenuItem>
         <MenuItem 
-          onClick={() => { onDelete(goal.id); handleMenuClose(); }}
+          onClick={() => { setShowDeleteDialog(true); handleMenuClose(); }}
           sx={{ color: 'error.main' }}
         >
           <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
@@ -458,6 +464,48 @@ export const GoalCard: React.FC<GoalCardProps> = ({
             disabled={newProgress < 0}
           >
             Update
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onClose={() => setShowDeleteDialog(false)}>
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <DeleteIcon color="error" />
+          Delete Goal
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" sx={{ mb: 2 }}>
+            Are you sure you want to delete the goal <strong>"{goal.name}"</strong>?
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            This action cannot be undone. You will lose:
+          </Typography>
+          <Box component="ul" sx={{ pl: 2, mt: 1 }}>
+            <Typography component="li" variant="body2" color="text.secondary">
+              All progress data ({formatCurrency(goal.current_amount)} saved)
+            </Typography>
+            <Typography component="li" variant="body2" color="text.secondary">
+              Goal history and tracking information
+            </Typography>
+            {goal.target_date && (
+              <Typography component="li" variant="body2" color="text.secondary">
+                Target date and timeline data
+              </Typography>
+            )}
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowDeleteDialog(false)}>
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleDeleteConfirm} 
+            color="error"
+            variant="contained"
+            startIcon={<DeleteIcon />}
+          >
+            Delete Goal
           </Button>
         </DialogActions>
       </Dialog>
