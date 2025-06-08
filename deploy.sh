@@ -77,6 +77,7 @@ check_requirements() {
 create_directories() {
     print_status "Creating necessary directories..."
     
+    mkdir -p data
     mkdir -p backup
     mkdir -p logs/nginx
     mkdir -p nginx/conf.d
@@ -94,16 +95,12 @@ generate_env_file() {
     if [[ ! -f .env.prod ]]; then
         print_status "Generating production environment file..."
         
-        # Generate random passwords
-        DB_PASSWORD=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-25)
+        # Generate random secret key
         SECRET_KEY=$(openssl rand -base64 64 | tr -d "=+/" | cut -c1-50)
         
         cat > .env.prod << EOF
 # Kubera Production Environment Configuration
 # Generated on $(date)
-
-# Database Configuration
-DB_PASSWORD=${DB_PASSWORD}
 
 # Application Security
 SECRET_KEY=${SECRET_KEY}
@@ -117,6 +114,9 @@ BACKUP_RETENTION_DAYS=30
 # Application Settings
 ENVIRONMENT=production
 LOG_LEVEL=INFO
+
+# Database Configuration (SQLite)
+# Database file will be stored in ./data/kubera.db
 EOF
         
         print_success "Environment file created: .env.prod"
@@ -281,7 +281,7 @@ deploy_application() {
     print_status "Building and deploying Kubera..."
     
     # Pull latest images
-    docker-compose -f docker-compose.prod.yml --env-file .env.prod pull postgres nginx
+    docker-compose -f docker-compose.prod.yml --env-file .env.prod pull nginx alpine
     
     # Build application images
     docker-compose -f docker-compose.prod.yml --env-file .env.prod build
@@ -310,6 +310,7 @@ show_status() {
     echo "🔄 Restart: docker-compose -f docker-compose.prod.yml restart"
     echo "🛑 Stop: docker-compose -f docker-compose.prod.yml down"
     echo "💾 Backup DB: docker-compose -f docker-compose.prod.yml --profile backup up db-backup"
+    echo "🗄️ Direct backup: docker run --rm -v ./data:/data:ro -v ./backup:/backup -v ./scripts:/scripts alpine:latest /scripts/sqlite-backup.sh"
 }
 
 # Main deployment flow

@@ -64,9 +64,6 @@ The deployment script will:
 Edit `.env.prod` to customize your deployment:
 
 ```bash
-# Database Configuration
-DB_PASSWORD=your-secure-password
-
 # Application Security
 SECRET_KEY=your-secret-key
 
@@ -75,6 +72,9 @@ DOMAIN_NAME=your-domain.com
 
 # Backup Configuration
 BACKUP_RETENTION_DAYS=30
+
+# Database Configuration (SQLite)
+# Database file will be stored in ./data/kubera.db
 ```
 
 ### SSL Certificates
@@ -161,8 +161,11 @@ docker-compose -f docker-compose.prod.yml up -d
 # Check application health
 curl -k https://your-pi-ip/health
 
-# Check database connection
-docker exec kubera-db pg_isready -U kubera_user -d kubera_prod
+# Check database file
+ls -la data/kubera.db
+
+# Check database integrity (requires sqlite3)
+sqlite3 data/kubera.db "PRAGMA integrity_check;"
 ```
 
 ## 🔒 Security Considerations
@@ -280,15 +283,18 @@ df -h
 free -h
 ```
 
-**Database connection issues:**
+**Database issues:**
 ```bash
-# Check database status
-docker exec kubera-db pg_isready
+# Check database file permissions
+ls -la data/kubera.db
 
-# Reset database password
-docker-compose -f docker-compose.prod.yml down
-docker volume rm kubera_postgres_data
-docker-compose -f docker-compose.prod.yml up -d
+# Check database integrity
+sqlite3 data/kubera.db "PRAGMA integrity_check;"
+
+# Reset database (backup first!)
+cp data/kubera.db backup/manual_backup_$(date +%Y%m%d_%H%M%S).db
+rm data/kubera.db
+docker-compose -f docker-compose.prod.yml restart backend
 ```
 
 **SSL certificate issues:**
@@ -313,10 +319,18 @@ rm ssl/*.pem
 **Slow database:**
 ```bash
 # Check database size
-docker exec kubera-db psql -U kubera_user -d kubera_prod -c "SELECT pg_size_pretty(pg_database_size('kubera_prod'));"
+du -h data/kubera.db
 
-# Vacuum database
-docker exec kubera-db psql -U kubera_user -d kubera_prod -c "VACUUM ANALYZE;"
+# Optimize database (vacuum)
+sqlite3 data/kubera.db "VACUUM; ANALYZE;"
+
+# Check database stats
+sqlite3 data/kubera.db "
+  SELECT name, COUNT(*) as records 
+  FROM sqlite_master 
+  WHERE type='table' 
+  GROUP BY name;
+"
 ```
 
 ## 📞 Support
