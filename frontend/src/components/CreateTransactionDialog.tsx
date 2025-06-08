@@ -15,6 +15,7 @@ import {
   InputAdornment,
   Typography,
 } from '@mui/material';
+import { AmountInput } from './AmountInput';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -171,71 +172,12 @@ export const CreateTransactionDialog: React.FC<CreateTransactionDialogProps> = (
               )}
 
               {/* Amount - First and Prominent */}
-              <Box sx={{ 
-                display: 'flex', 
-                flexDirection: 'column',
-                alignItems: 'center',
-                p: 3, 
-                bgcolor: 'grey.50', 
-                borderRadius: 2,
-                border: '2px solid',
-                borderColor: 'grey.300'
-              }}>
-                <Typography variant="h6" sx={{ mb: 2, color: 'text.secondary' }}>
-                  Amount
-                </Typography>
-                <Box sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
-                  gap: 1,
-                  mb: 2
-                }}>
-                  <Typography variant="h3" sx={{ color: 'text.secondary' }}>
-                    $
-                  </Typography>
-                  <TextField
-                    type="number"
-                    value={formData.amount || ''}
-                    onChange={handleInputChange('amount')}
-                    required
-                    disabled={loading || loadingData}
-                    inputProps={{ 
-                      step: 0.01,
-                      style: { 
-                        textAlign: 'center',
-                        fontSize: '2rem',
-                        fontWeight: 500,
-                        padding: '8px'
-                      }
-                    }}
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        backgroundColor: 'white',
-                        borderRadius: 2,
-                        minWidth: '200px',
-                        '& fieldset': {
-                          borderWidth: 2,
-                        },
-                      },
-                      '& .MuiOutlinedInput-input': {
-                        textAlign: 'center',
-                      }
-                    }}
-                    placeholder="0.00"
-                    variant="outlined"
-                  />
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  {formData.amount > 0 ? '💰' : formData.amount < 0 ? '💸' : '💱'}
-                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    {formData.amount > 0 ? "Income" : formData.amount < 0 ? "Expense" : "Enter amount"}
-                  </Typography>
-                </Box>
-                <Typography variant="caption" sx={{ mt: 1, color: 'text.secondary', textAlign: 'center' }}>
-                  Positive for income • Negative for expense
-                </Typography>
-              </Box>
+              <AmountInput
+                value={formData.amount || 0}
+                onChange={(value) => setFormData(prev => ({ ...prev, amount: value }))}
+                disabled={loading || loadingData}
+                required
+              />
 
               {/* Payee */}
               <TextField

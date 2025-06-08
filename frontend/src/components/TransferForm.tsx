@@ -14,6 +14,7 @@ import {
   Box,
   Typography,
 } from '@mui/material';
+import { AmountInput } from './AmountInput';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -179,17 +180,12 @@ export const TransferForm: React.FC<TransferFormProps> = ({
                 </Select>
               </FormControl>
 
-              <TextField
-                fullWidth
-                required
-                label="Amount"
-                type="number"
-                inputProps={{ min: 0.01, step: 0.01 }}
-                value={formData.amount || ''}
-                onChange={(e) =>
-                  setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })
-                }
+              <AmountInput
+                value={formData.amount || 0}
+                onChange={(value) => setFormData({ ...formData, amount: value })}
                 disabled={loading}
+                required
+                label="Transfer Amount"
               />
 
               <TextField

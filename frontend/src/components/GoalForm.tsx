@@ -15,6 +15,7 @@ import {
   Typography,
   FormHelperText,
 } from '@mui/material';
+import { AmountInput } from './AmountInput';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -253,21 +254,12 @@ export const GoalForm: React.FC<GoalFormProps> = ({
                 </FormHelperText>
               </FormControl>
 
-              <TextField
-                fullWidth
+              <AmountInput
+                value={formData.target_amount || 0}
+                onChange={(value) => setFormData({ ...formData, target_amount: value })}
+                disabled={loading}
                 required
                 label="Target Amount"
-                type="number"
-                inputProps={{ min: 0.01, step: 0.01 }}
-                value={formData.target_amount || ''}
-                onChange={(e) =>
-                  setFormData({ 
-                    ...formData, 
-                    target_amount: parseFloat(e.target.value) || 0
-                  })
-                }
-                disabled={loading}
-                placeholder="0.00"
               />
 
               {formData.goal_type === 'amount_date' && (

@@ -47,6 +47,7 @@ import { FREQUENCY_LABELS } from '../types/recurringTransaction';
 import type { Account } from '../types/account';
 import type { Category } from '../types/transaction';
 import { Layout } from '../components/Layout';
+import { AmountInput } from '../components/AmountInput';
 
 export const RecurringTransactionsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -362,15 +363,11 @@ export const RecurringTransactionsPage: React.FC = () => {
                 required
               />
               
-              <TextField
-                fullWidth
-                label="Amount"
-                type="number"
-                value={formData.amount}
-                onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
-                inputProps={{ step: 0.01 }}
+              <AmountInput
+                value={formData.amount || 0}
+                onChange={(value) => setFormData({ ...formData, amount: value })}
                 required
-                helperText="Positive for income, negative for expense"
+                label="Amount"
               />
               
               <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2 }}>

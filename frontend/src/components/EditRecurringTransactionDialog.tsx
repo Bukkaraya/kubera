@@ -16,6 +16,7 @@ import {
   FormControlLabel,
   Typography,
 } from '@mui/material';
+import { AmountInput } from './AmountInput';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -192,60 +193,15 @@ export const EditRecurringTransactionDialog: React.FC<EditRecurringTransactionDi
               />
 
               {/* Amount and Income/Expense Toggle */}
-              <Box sx={{ 
-                display: 'flex', 
-                flexDirection: 'column',
-                alignItems: 'center',
-                p: 3, 
-                bgcolor: 'grey.50', 
-                borderRadius: 2,
-                border: '2px solid',
-                borderColor: 'grey.300'
-              }}>
-                <Typography variant="h6" sx={{ mb: 2, color: 'text.secondary' }}>
-                  Amount
-                </Typography>
-                <TextField
-                  type="number"
-                  value={formData.amount || ''}
-                  onChange={handleInputChange('amount')}
-                  disabled={loading || loadingData}
-                  inputProps={{ 
-                    min: 0.01, 
-                    step: 0.01,
-                    style: { 
-                      fontSize: '2rem', 
-                      textAlign: 'center',
-                      fontWeight: 600
-                    }
-                  }}
-                  sx={{ 
-                    '& .MuiOutlinedInput-root': {
-                      '& fieldset': { border: 'none' },
-                    },
-                    '& .MuiInputBase-input': {
-                      color: formData.is_income ? 'success.main' : 'error.main'
-                    }
-                  }}
-                  required
-                />
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={formData.is_income || false}
-                      onChange={handleSwitchChange('is_income')}
-                      color="success"
-                      disabled={loading || loadingData}
-                    />
-                  }
-                  label={
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      {formData.is_income ? 'Income' : 'Expense'}
-                    </Typography>
-                  }
-                  sx={{ mt: 1 }}
-                />
-              </Box>
+              <AmountInput
+                value={formData.amount || 0}
+                onChange={(value) => setFormData(prev => ({ ...prev, amount: value }))}
+                isIncome={formData.is_income || false}
+                onIncomeChange={(isIncome) => setFormData(prev => ({ ...prev, is_income: isIncome }))}
+                disabled={loading || loadingData}
+                required
+                showIncomeToggle
+              />
 
               {/* Account and Category */}
               <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2 }}>
